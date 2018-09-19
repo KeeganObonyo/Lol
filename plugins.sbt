@@ -12,7 +12,9 @@ libraryDependencies ++= Seq(
 
 "com.typesafe.akka" %% "akka-http" % "10.1.5",
 
-"com.typesafe.akka" %% "akka-http-testkit" % "10.1.5" % Test
+"com.typesafe.akka" %% "akka-http-testkit" % "10.1.5" % Test,
+
+"com.github.mauricio" %% "postgresql-async" % "0.2.21"
 
 // "com.h2database" % "h2" % "1.2.137",
 

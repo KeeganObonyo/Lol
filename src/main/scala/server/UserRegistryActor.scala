@@ -19,6 +19,7 @@ object UserRegistryActor {
 }
 
 class UserRegistryActor extends Actor with ActorLogging {
+  
   import UserRegistryActor._
 
   var users = Set.empty[User]
