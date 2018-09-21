@@ -7,16 +7,20 @@ import com.github.mauricio.async.db.util.ExecutorServiceUtils.CachedExecutionCon
 import com.github.mauricio.async.db.{RowData, QueryResult, Connection}
 import scala.concurrent.duration._
 import scala.concurrent.{Await, Future}
+import akka.util.Timeout
+import scala.concurrent.duration._
+import java.util.concurrent.TimeUnit
 
 object BasicDataBaseActor {
 
-    val configuration = URLParser.parse("jdbc:postgresql://localhost:5432/lol_database?user=postgres&password=postgres")
 
-    final case object Connected
+    final case class Write(statement : String)
+
+    final case class Query(statement: String)
     
-  def props: Props = Props[BasicDataBaseActor]
 
 }
+
 
 // Actor for handling database connections to allow for concurrent connections to the database  
 
@@ -24,13 +28,39 @@ class BasicDataBaseActor extends Actor with ActorLogging {
 
     import BasicDataBaseActor._
 
+    val configuration = URLParser.parse("jdbc:postgresql://localhost:5432/lol_database?user=postgres&password=postgres")
+
+    val  connection = new PostgreSQLConnection(configuration) 
+
     def receive : Receive = {
+//write to the database
+        case Write(statement) =>
 
-        case Connected =>
+        val future = connection.sendPreparedStatement(statement)
 
-        val  connection = new PostgreSQLConnection(configuration) 
+        connection.disconnect
+
+//query the database
+        case Query(statement) =>
+
+        val future: Future[QueryResult] = connection.sendQuery(statement)
+
+        val mapResult: Future[Any] = future.map(queryResult => queryResult.rows match {
+
+        case Some(resultSet) => {
+
+        val row : RowData = resultSet.head
+
+        row(0)
+      }
+      case None => -1
+    }
+    )
+
+    val result = Await.result( mapResult, 5 seconds )
+
+    connection.disconnect
 
     } 
   
 }
-

@@ -4,13 +4,14 @@ package server
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
-import akka.actor.{ ActorRef, ActorSystem }
+import akka.actor.{ ActorRef, ActorSystem, Props }
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 import akka.stream.ActorMaterializer
 import scala.io.StdIn
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
+import models._
 
 //#main-class
 object LolServer extends App with UserRoutes {
@@ -18,13 +19,13 @@ object LolServer extends App with UserRoutes {
   // set up ActorSystem and other dependencies here
   //#main-class
   //#server-bootstrapping
-  implicit val system: ActorSystem = ActorSystem("helloAkkaHttpServer")
+  implicit val system: ActorSystem = ActorSystem("LolHttpServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
   //#server-bootstrapping
 
-  val userRegistryActor: ActorRef = system.actorOf(UserRegistryActor.props, "userRegistryActor")
+  val userRegistryActor: ActorRef = system.actorOf(Props[UserRegistryActor], "userRegistryActor")
 
   //#main-class
   // from the UserRoutes trait
