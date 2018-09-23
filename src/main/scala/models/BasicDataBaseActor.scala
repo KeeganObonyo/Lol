@@ -17,8 +17,6 @@ object BasicDataBaseActor {
     final case class Write(statement : String)
 
     final case class Query(statement: String)
-    
-
 }
 
 
