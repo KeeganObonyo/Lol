@@ -30,13 +30,14 @@ class UserRegistryActor extends Actor with ActorLogging {
   
   import UserRegistryActor._
 
-  implicit val system: ActorSystem = ActorSystem("LolDbs")
+  implicit val system  = context.system
  
   val basicDataBaseActor: ActorRef = system.actorOf(Props[BasicDataBaseActor], "basicDataBaseActor")
 
   var users = Set.empty[User]
 
   var user = User 
+
 //TODO Add methods to map query results to our User classes and handle exceptions
   def receive: Receive = {
     case GetUsers =>
