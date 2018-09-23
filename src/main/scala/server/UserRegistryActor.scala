@@ -46,7 +46,7 @@ class UserRegistryActor extends Actor with ActorLogging {
       (basicDataBaseActor ! Write("insert to users (name, age, countryofresidence) values ($1, $2, $3) returning id"))
       sender() ! ActionPerformed(s"User ${user.name} created.")
     case GetUser(name) =>
-      (basicDataBaseActor ! Query( "SELECT * FROM users WHERE products.name = $1"))
+      (basicDataBaseActor ! Query( "SELECT * FROM users WHERE users.name = $1"))
     case DeleteUser(name) =>
       (basicDataBaseActor ! Write("delete from users where id = $1"))
       sender() ! ActionPerformed(s"User ${name} deleted.")
