@@ -3,9 +3,11 @@ package server
 //#user-registry-actor
 import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
 import akka.pattern.ask
-import models.BasicDataBaseActor._
+import models._
 import models._
 import akka.util.Timeout
+import java.io.IOException
+import java.io.FileNotFoundException
 
 
 //#user-case-classes
@@ -25,32 +27,30 @@ object UserRegistryActor {
 
   // def props: Props = Props[UserRegistryActor]
 }
+//TODO: fix timeout bug while accessing the UserRegistryActor exiting with an internal server error
 
 class UserRegistryActor extends Actor with ActorLogging {
   
   import UserRegistryActor._
 
-  implicit val system  = context.system
- 
-  val basicDataBaseActor: ActorRef = system.actorOf(Props[BasicDataBaseActor], "basicDataBaseActor")
+  import BasicDataBase._
 
   var users = Set.empty[User]
 
   var user = User 
 
-//TODO Add methods to map query results to our User classes and handle exceptions
   def receive: Receive = {
     case GetUsers =>
-      val result = (basicDataBaseActor ! Query("SELECT * FROM users"))
+      BasicDataBase.getUsers()
+      // sender() ! ActionPerformed(s"Users from table users retrieved.")
     case CreateUser(user) =>
-      (basicDataBaseActor ! Write("insert to users (name, age, countryofresidence) values ($1, $2, $3) returning id"))
-      sender() ! ActionPerformed(s"User ${user.name} created.")
+      BasicDataBase.addUser(user)
+      // sender() ! ActionPerformed(s"User ${user.name} created.")
     case GetUser(name) =>
-      (basicDataBaseActor ! Query( "SELECT * FROM users WHERE users.name = $1"))
+      BasicDataBase.getUser(name)
     case DeleteUser(name) =>
-      (basicDataBaseActor ! Write("delete from users where id = $1"))
-      sender() ! ActionPerformed(s"User ${name} deleted.")
-
-  }
+      BasicDataBase.deleteUser(name)
+      // sender() ! ActionPerformed(s"User ${name} deleted.")
+    }
   }
 //#user-registry-actor
