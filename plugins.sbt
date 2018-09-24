@@ -14,7 +14,9 @@ libraryDependencies ++= Seq(
 
 "com.typesafe.akka" %% "akka-http-testkit" % "10.1.5" % Test,
 
-"com.github.mauricio" %% "postgresql-async" % "0.2.21"
+"com.github.mauricio" %% "postgresql-async" % "0.2.21",
+
+"ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime
 
 // "com.h2database" % "h2" % "1.2.137",
 
