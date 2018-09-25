@@ -22,78 +22,52 @@ object BasicDataBase {
 
     val connection: Connection = new PostgreSQLConnection(configuration)
 
-  def getUsers():Any= {
+  def getUsers(): Future[List[User]]= {
 
-    Await.result(connection.connect, 5 seconds)
+    // Await.result(connection.connect, 5 seconds)
 
-    val future: Future[QueryResult] = connection.sendQuery("SELECT * FROM users")
-
-    try {
-        val users : Future[Users] = future.map(queryResult => queryResult.rows match {
-
-        case Some(resultSet) => {
-            val row : RowData = resultSet.head
-            row(0)
-            }
-        case None => -1
-        }
-        ).mapTo[Users]
-        users
-    } catch {
-      case ex: FileNotFoundException =>{
-          server.User
+    connection.sendQuery("SELECT * FROM users").map { queryResult => 
+      queryResult.rows match {
+        case Some(rows) => connection.disconnect ; rows.toList map (x => rowToModel(x))
+        case None => connection.disconnect ; List()
       }
-      case ex: IOException =>{
-          server.Users
-      }
-  }
-    connection.disconnect
+    }
   }
 
-  def addUser(user:server.User){
+  def addUser(args:Array[Any]){
 
-    val future = connection.sendPreparedStatement("insert to users (name, age, countryofresidence) values ($1, $2, $3) returning id")
+    // Await.result(connection.connect, 5 seconds)
 
-    connection.disconnect
-
+    connection.sendPreparedStatement("insert into users (name, age, countryofresidence) values (?,?,?)",args)
+    // connection.disconnect
   }
 
   def deleteUser(args: String){
 
-    val future = connection.sendPreparedStatement("delete from users where users.name = ?", Array(args))
-
-    connection.disconnect
+    connection.sendPreparedStatement("delete from users where name = ?", Array(args))
+    // connection.disconnect
 
   }
 
-  def getUser(args:String) : Any = {
+  def getUser(args:String): Future[List[User]]= {
 
-    Await.result(connection.connect, 5 seconds)
+    // Await.result(connection.connect, 5 seconds)
 
-    val future = connection.sendPreparedStatement("SELECT * FROM users WHERE users.name = ?", Array(args))
-
-    try{
-        val user : Future[User] = future.map(queryResult => queryResult.rows match {
-
-        case Some(resultSet) => {
-            val row : RowData = resultSet.head
-            row(0)
-            }
-        case None => -1
-        }
-        ).mapTo[User]
-        user
-    } catch {
-
-      case ex: FileNotFoundException =>{
-          server.User
-      }
-      case ex: IOException =>{
-          server.User
+    connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE name = ?", Array(args)).map { 
+      queryResult => 
+      queryResult.rows match {
+        case Some(rows) => connection.disconnect ; rows.toList map (x => rowToModel(x))
+        case None => connection.disconnect ; List() 
+        case _ => connection.disconnect ; List()
       }
     }
-
   }
-    connection.disconnect
 
+  private def rowToModel(row: RowData): User = {
+      new User(
+        name       = row("name").asInstanceOf[String],
+        age        = row("age").asInstanceOf[Int],
+        countryOfResidence = row("countryofresidence").asInstanceOf[String]
+      )
+    }
 }

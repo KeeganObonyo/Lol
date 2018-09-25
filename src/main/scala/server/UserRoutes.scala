@@ -33,6 +33,14 @@ trait UserRoutes extends JsonSupport {
   // Required by the `ask` (?) method below
   implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
 
+
+  private def ModelTorow(user:User): Array[Any] = {
+      Array(
+        user.name,
+        user.age,
+        user.countryOfResidence
+      )
+    }
   //#all-routes
   //#users-get-post
   //#users-get-delete   
@@ -49,11 +57,11 @@ trait UserRoutes extends JsonSupport {
             },
             post {
               entity(as[User]) { user =>
-                val userCreated: Future[ActionPerformed] =
-                  (userRegistryActor ? CreateUser(user)).mapTo[ActionPerformed]
+                val userCreated =
+                  (userRegistryActor ? CreateUser(ModelTorow(user)))
                 onSuccess(userCreated) { performed =>
-                  log.info("Created user [{}]: {}", user.name, performed.description)
-                  complete((StatusCodes.Created, performed))
+                  log.info("Created user")
+                  complete((StatusCodes.Created))
                 }
               }
             }
@@ -65,8 +73,8 @@ trait UserRoutes extends JsonSupport {
           concat(
             get {
               //#retrieve-user-info
-              val maybeUser: Future[Option[User]] =
-                (userRegistryActor ? GetUser(name)).mapTo[Option[User]]
+              val maybeUser: Future[User] =
+                (userRegistryActor ? GetUser(name)).mapTo[User]
               rejectEmptyResponse {
                 complete(maybeUser)
               }
@@ -74,11 +82,11 @@ trait UserRoutes extends JsonSupport {
             },
             delete {
               //#users-delete-logic
-              val userDeleted: Future[ActionPerformed] =
-                (userRegistryActor ? DeleteUser(name)).mapTo[ActionPerformed]
+              val userDeleted =
+                (userRegistryActor ? DeleteUser(name))
               onSuccess(userDeleted) { performed =>
-                log.info("Deleted user [{}]: {}", name, performed.description)
-                complete((StatusCodes.OK, performed))
+                log.info("Deleted user")
+                complete((StatusCodes.OK))
               }
               //#users-delete-logic
             }

@@ -8,6 +8,7 @@ import models._
 import akka.util.Timeout
 import java.io.IOException
 import java.io.FileNotFoundException
+import akka.pattern.pipe
 
 
 //#user-case-classes
@@ -21,7 +22,7 @@ final case class Users(users: Seq[User])
 object UserRegistryActor {
   final case class ActionPerformed(description: String)
   final case object GetUsers
-  final case class CreateUser(user: User)
+  final case class CreateUser(user:Array[Any])
   final case class GetUser(name: String)
   final case class DeleteUser(name: String)
 
@@ -37,20 +38,15 @@ class UserRegistryActor extends Actor with ActorLogging {
 
   var users = Set.empty[User]
 
-  var user = User 
-
   def receive: Receive = {
     case GetUsers =>
-      BasicDataBase.getUsers()
-      // sender() ! ActionPerformed(s"Users from table users retrieved.")
+      BasicDataBase.getUsers().mapTo[List[User]] pipeTo sender
     case CreateUser(user) =>
-      BasicDataBase.addUser(user)
-      // sender() ! ActionPerformed(s"User ${user.name} created.")
+      sender ! BasicDataBase.addUser(user)
     case GetUser(name) =>
-      BasicDataBase.getUser(name)
+      BasicDataBase.getUser(name).mapTo[List[User]] pipeTo sender
     case DeleteUser(name) =>
-      BasicDataBase.deleteUser(name)
-      // sender() ! ActionPerformed(s"User ${name} deleted.")
+      sender ! BasicDataBase.deleteUser(name)
     }
   }
 //#user-registry-actor

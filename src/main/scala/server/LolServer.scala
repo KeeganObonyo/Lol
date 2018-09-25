@@ -44,7 +44,7 @@ object LolServer extends App with UserRoutes {
   //#main-class
 
   //#http-server
-  val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
+  val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
 
   println(s"Server online at http://localhost:8000/\nPress Enter to stop...")
 
