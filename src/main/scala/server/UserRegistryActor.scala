@@ -39,11 +39,7 @@ class UserRegistryActor extends Actor with ActorLogging {
     case CreateUser(user) =>
       sender ! databaseinstance.addUser(user)
     case GetUser(name) =>
-      try {
-        databaseinstance.getUser(name).mapTo[User] pipeTo sender
-      } catch {
-        case _:Throwable=>Nil
-      }
+      databaseinstance.getUser(name).mapTo[User] pipeTo sender
     case DeleteUser(name) =>
       sender ! databaseinstance.deleteUser(name)
     }
