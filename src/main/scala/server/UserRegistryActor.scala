@@ -34,19 +34,17 @@ class UserRegistryActor extends Actor with ActorLogging {
   
   import UserRegistryActor._
 
-  import BasicDataBase._
-
-  var users = Set.empty[User]
+  val databaseinstance = BasicDataBase()
 
   def receive: Receive = {
     case GetUsers =>
-      BasicDataBase.getUsers().mapTo[List[User]] pipeTo sender
+      databaseinstance.getUsers()//.mapTo[List[User]] pipeTo sender
     case CreateUser(user) =>
-      sender ! BasicDataBase.addUser(user)
+      sender ! databaseinstance.addUser(user)
     case GetUser(name) =>
-      BasicDataBase.getUser(name).mapTo[List[User]] pipeTo sender
+      databaseinstance.getUser(name)//.mapTo[List[User]] pipeTo sender
     case DeleteUser(name) =>
-      sender ! BasicDataBase.deleteUser(name)
+      sender ! databaseinstance.deleteUser(name)
     }
   }
 //#user-registry-actor

@@ -22,43 +22,46 @@ object BasicDataBase {
 
     val connection: Connection = new PostgreSQLConnection(configuration)
 
-  def getUsers(): Future[List[User]]= {
+    Await.result(connection.connect, 1 seconds)
 
-    // Await.result(connection.connect, 5 seconds)
+    def apply(): BasicDataBase = {
+        new BasicDataBase()
+ }
+
+
+}
+
+class BasicDataBase {
+
+  import BasicDataBase._
+
+  def getUsers(): Future[List[User]]= {
 
     connection.sendQuery("SELECT * FROM users").map { queryResult => 
       queryResult.rows match {
-        case Some(rows) => connection.disconnect ; rows.toList map (x => rowToModel(x))
-        case None => connection.disconnect ; List()
+        case Some(rows) => rows.toList map (x => rowToModel(x))
+        case None => List()
       }
     }
   }
 
   def addUser(args:Array[Any]){
-
-    // Await.result(connection.connect, 5 seconds)
-
     connection.sendPreparedStatement("insert into users (name, age, countryofresidence) values (?,?,?)",args)
-    // connection.disconnect
   }
 
   def deleteUser(args: String){
 
-    connection.sendPreparedStatement("delete from users where name = ?", Array(args))
-    // connection.disconnect
-
+    val future = connection.sendPreparedStatement("delete from users where name = ? returning name", Array(args))
   }
 
   def getUser(args:String): Future[List[User]]= {
 
-    // Await.result(connection.connect, 5 seconds)
-
     connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE name = ?", Array(args)).map { 
       queryResult => 
       queryResult.rows match {
-        case Some(rows) => connection.disconnect ; rows.toList map (x => rowToModel(x))
-        case None => connection.disconnect ; List() 
-        case _ => connection.disconnect ; List()
+        case Some(rows) => rows.toList map (x => rowToModel(x))
+        case None => List() 
+        case _ => List()
       }
     }
   }
