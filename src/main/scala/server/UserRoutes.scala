@@ -84,10 +84,10 @@ trait UserRoutes extends JsonSupport {
               //#users-delete-logic
               val userDeleted =
                 (userRegistryActor ? DeleteUser(name))
-              // onSuccess(userDeleted) { performed =>
-              //   log.info("Deleted user")
+              onSuccess(userDeleted) { performed =>
+                log.info("Deleted user")
                 complete((StatusCodes.OK))
-              // }
+              }
               //#users-delete-logic
             }
           )

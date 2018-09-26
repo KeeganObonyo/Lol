@@ -61,10 +61,13 @@ class BasicDataBase {
       queryResult.rows match {
         case Some(row) => {
           val listy = row.toList map (x => rowToModel(x))
-          listy(0)
+          try{
+            listy(0)
+          } catch {
+            case _:Throwable => User(name = "", age = 0, countryOfResidence = "")
+          }
         }
-        case None => Nil
-        case _ => Nil
+        case None => User(name = "", age = 0, countryOfResidence = "")
       }
     }
   }
