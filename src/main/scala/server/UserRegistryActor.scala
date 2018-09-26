@@ -2,22 +2,20 @@ package server
 
 //#user-registry-actor
 import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
+import scala.concurrent.{Await, Future}
+import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
-import models._
 import models._
 import akka.util.Timeout
 import java.io.IOException
 import java.io.FileNotFoundException
 import akka.pattern.pipe
 
-
 //#user-case-classes
 final case class User(name: String, age: Int, countryOfResidence: String)
 
-final case class Users(users: Seq[User])
+final case class Users(users: Seq[Any])
 
-
-//#user-case-classes
 
 object UserRegistryActor {
   final case class ActionPerformed(description: String)
@@ -26,7 +24,6 @@ object UserRegistryActor {
   final case class GetUser(name: String)
   final case class DeleteUser(name: String)
 
-  // def props: Props = Props[UserRegistryActor]
 }
 //TODO: fix timeout bug while accessing the UserRegistryActor exiting with an internal server error
 
@@ -38,11 +35,11 @@ class UserRegistryActor extends Actor with ActorLogging {
 
   def receive: Receive = {
     case GetUsers =>
-      databaseinstance.getUsers()//.mapTo[List[User]] pipeTo sender
+      databaseinstance.getUsers.mapTo[Users] pipeTo sender
     case CreateUser(user) =>
       sender ! databaseinstance.addUser(user)
     case GetUser(name) =>
-      databaseinstance.getUser(name)//.mapTo[List[User]] pipeTo sender
+      databaseinstance.getUser(name).mapTo[User] pipeTo sender
     case DeleteUser(name) =>
       sender ! databaseinstance.deleteUser(name)
     }

@@ -10,7 +10,7 @@ import scala.concurrent.{Await, Future}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
-import server._
+import server.User
 import java.io.IOException
 import java.io.FileNotFoundException
 
@@ -54,23 +54,26 @@ class BasicDataBase {
     val future = connection.sendPreparedStatement("delete from users where name = ? returning name", Array(args))
   }
 
-  def getUser(args:String): Future[List[User]]= {
+  def getUser(args:String)= {
 
     connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE name = ?", Array(args)).map { 
       queryResult => 
       queryResult.rows match {
-        case Some(rows) => rows.toList map (x => rowToModel(x))
-        case None => List() 
-        case _ => List()
+        case Some(row) => {
+          val listy = row.toList map (x => rowToModel(x))
+          listy(0)
+        }
+        case None => Nil
+        case _ => Nil
       }
     }
   }
 
   private def rowToModel(row: RowData): User = {
       new User(
-        name       = row("name").asInstanceOf[String],
-        age        = row("age").asInstanceOf[Int],
-        countryOfResidence = row("countryofresidence").asInstanceOf[String]
+        name       = row(1).asInstanceOf[String],
+        age        = row(2).asInstanceOf[Int],
+        countryOfResidence = row(3).asInstanceOf[String]
       )
     }
 }
