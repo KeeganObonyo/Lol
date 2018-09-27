@@ -21,7 +21,7 @@ trait DbQueries {
   }
 
   def addUser(args:Array[Any]){
-    connection.sendPreparedStatement("insert into users (name, age, countryofresidence) values (?,?,?)",args)
+    connection.sendPreparedStatement("insert into users (name, email, password) values (?,?,crypt(?, gen_salt('bf', 8)))",args)
   }
 
   def deleteUser(args: String){
@@ -31,7 +31,7 @@ trait DbQueries {
 
   def getUser(args:String)= {
 
-    connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE id = ?", Array(args)).map { 
+    connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE id = ?", Array(args)).map { 
       queryResult => 
       queryResult.rows match {
         case Some(row) => {
@@ -39,10 +39,10 @@ trait DbQueries {
           try{
             listy(0)
           } catch {
-            case _:Throwable => User(id = 0, name = "", age = 0, countryOfResidence = "")
+            case _:Throwable => User(id = 0, name = "", email = "", password = "")
           }
         }
-        case None => User(id = 0, name = "", age = 0, countryOfResidence = "")
+        case None => User(id = 0, name = "", email = "", password = "")
       }
     }
   }
@@ -51,8 +51,8 @@ trait DbQueries {
       new User(
         id        = row(0).asInstanceOf[Int],
         name       = row(1).asInstanceOf[String],
-        age        = row(2).asInstanceOf[Int],
-        countryOfResidence = row(3).asInstanceOf[String]
+        email        = row(2).asInstanceOf[String],
+        password = row(3).asInstanceOf[String]
       )
     }
   private def rowToModelList(row: List[RowData]): Users = {
