@@ -69,12 +69,12 @@ trait UserRoutes extends JsonSupport {
         },
         //#users-get-post
         //#users-get-delete
-        path(Segment) { name =>
+        path(Segment) { id =>
           concat(
             get {
               //#retrieve-user-info
               val maybeUser: Future[User] =
-                (userRegistryActor ? GetUser(name)).mapTo[User]
+                (userRegistryActor ? GetUser(id)).mapTo[User]
               rejectEmptyResponse {
                 complete(maybeUser)
               }
@@ -83,7 +83,7 @@ trait UserRoutes extends JsonSupport {
             delete {
               //#users-delete-logic
               val userDeleted =
-                (userRegistryActor ? DeleteUser(name))
+                (userRegistryActor ? DeleteUser(id))
               onSuccess(userDeleted) { performed =>
                 log.info("Deleted user")
                 complete((StatusCodes.OK))

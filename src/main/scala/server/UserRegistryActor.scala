@@ -12,7 +12,7 @@ import java.io.FileNotFoundException
 import akka.pattern.pipe
 
 //#user-case-classes
-final case class User(name: String, age: Int, countryOfResidence: String)
+final case class User(id: Int, name: String, age: Int, countryOfResidence: String)
 
 final case class Users(users: List[User])
 
@@ -38,10 +38,10 @@ class UserRegistryActor extends Actor with ActorLogging {
       databaseinstance.getUsers.mapTo[Users] pipeTo sender
     case CreateUser(user) =>
       sender ! databaseinstance.addUser(user)
-    case GetUser(name) =>
-      databaseinstance.getUser(name).mapTo[User] pipeTo sender
-    case DeleteUser(name) =>
-      sender ! databaseinstance.deleteUser(name)
+    case GetUser(id) =>
+      databaseinstance.getUser(id).mapTo[User] pipeTo sender
+    case DeleteUser(id) =>
+      sender ! databaseinstance.deleteUser(id)
     }
   }
 //#user-registry-actor

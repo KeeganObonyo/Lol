@@ -51,12 +51,12 @@ class BasicDataBase {
 
   def deleteUser(args: String){
 
-    val future = connection.sendPreparedStatement("delete from users where name = ? returning name", Array(args))
+    val future = connection.sendPreparedStatement("delete from users where id = ? returning id", Array(args))
   }
 
   def getUser(args:String)= {
 
-    connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE name = ?", Array(args)).map { 
+    connection.sendPreparedStatement("SELECT id, name, age, countryofresidence FROM users WHERE id = ?", Array(args)).map { 
       queryResult => 
       queryResult.rows match {
         case Some(row) => {
@@ -64,16 +64,17 @@ class BasicDataBase {
           try{
             listy(0)
           } catch {
-            case _:Throwable => User(name = "", age = 0, countryOfResidence = "")
+            case _:Throwable => User(id = 0, name = "", age = 0, countryOfResidence = "")
           }
         }
-        case None => User(name = "", age = 0, countryOfResidence = "")
+        case None => User(id = 0, name = "", age = 0, countryOfResidence = "")
       }
     }
   }
 
   private def rowToModel(row: RowData): User = {
       new User(
+        id        = row(0).asInstanceOf[Int],
         name       = row(1).asInstanceOf[String],
         age        = row(2).asInstanceOf[Int],
         countryOfResidence = row(3).asInstanceOf[String]
