@@ -11,11 +11,13 @@ import akka.stream.ActorMaterializer
 import scala.io.StdIn
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
+
 import models._
 import users._
+import auth._
 
 //#main-class
-object LolServer extends App with UserRoutes {
+object LolServer extends App with UserRoutes with AuthRoutes {
 
   // set up ActorSystem and other dependencies here
   //#main-class
@@ -27,7 +29,6 @@ object LolServer extends App with UserRoutes {
 
   val userRegistryActor: ActorRef = system.actorOf(Props[UserRegistryActor], "userRegistryActor")
 
-
   lazy val homeRoute: Route =
       path("") {
         println("/")
@@ -37,7 +38,7 @@ object LolServer extends App with UserRoutes {
         }
       }
 
-  lazy val routes: Route = concat(userRoutes,homeRoute)
+  lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes)
 
   //#http-server
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
