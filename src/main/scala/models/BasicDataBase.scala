@@ -10,7 +10,7 @@ import scala.concurrent.{Await, Future}
 import akka.util.Timeout
 import scala.concurrent.duration._
 import java.util.concurrent.TimeUnit
-import server.User
+import server.{User,Users}
 import java.io.IOException
 import java.io.FileNotFoundException
 
@@ -35,12 +35,12 @@ class BasicDataBase {
 
   import BasicDataBase._
 
-  def getUsers(): Future[List[User]]= {
+  def getUsers()= {
 
     connection.sendQuery("SELECT * FROM users").map { queryResult => 
       queryResult.rows match {
-        case Some(rows) => rows.toList map (x => rowToModel(x))
-        case None => List()
+        case Some(rows) => rowToModelList(rows.toList)
+        case None => Nil
       }
     }
   }
@@ -79,4 +79,9 @@ class BasicDataBase {
         countryOfResidence = row(3).asInstanceOf[String]
       )
     }
+  private def rowToModelList(row: List[RowData]): Users = {
+      new Users(
+        users     = row.toList map (x => rowToModel(x))
+      )
+  }
 }
