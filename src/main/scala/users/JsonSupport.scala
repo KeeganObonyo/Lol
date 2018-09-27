@@ -13,7 +13,7 @@ trait JsonSupport extends SprayJsonSupport {
 
   implicit val userJsonFormat = jsonFormat4(User)
 
-  implicit val userpostJsonFormat = jsonFormat3(UserPost)
+  implicit val userpostJsonFormat = jsonFormat3(UserPost) 
   
   implicit val usersJsonFormat = jsonFormat1(Users)
 

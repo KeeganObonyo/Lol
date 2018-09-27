@@ -37,8 +37,8 @@ trait UserRoutes extends JsonSupport {
   private def ModelTorow(user:UserPost): Array[Any] = {
       Array(
         user.name,
-        user.age,
-        user.countryOfResidence
+        user.email,
+        user.password
       )
     }
   //#all-routes
@@ -55,9 +55,9 @@ trait UserRoutes extends JsonSupport {
               complete(users)
             },
             post {
-              entity(as[UserPost]) { user =>
+              entity(as[UserPost]) { userp =>
                 val userCreated =
-                  (userRegistryActor ? CreateUser(ModelTorow(user)))
+                  (userRegistryActor ? CreateUser(ModelTorow(userp)))
                 onSuccess(userCreated) { performed =>
                   log.info("Created user")
                   complete((StatusCodes.Created))

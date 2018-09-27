@@ -12,9 +12,9 @@ import java.io.FileNotFoundException
 import akka.pattern.pipe
 
 //#user-case-classes
-final case class User(id: Int, name: String, age: Int, countryOfResidence: String)
+final case class User(id: Int, name: String, email: String, password: String)
 
-final case class UserPost(name: String, age: Int, countryOfResidence: String)
+final case class UserPost(name: String, email: String, password: String)
 
 final case class Users(users: List[User])
 
