@@ -1,6 +1,6 @@
-package server
+package users
 
-import server.UserRegistryActor.ActionPerformed
+import users.UserRegistryActor.ActionPerformed
 
 //#json-support
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
@@ -12,6 +12,8 @@ trait JsonSupport extends SprayJsonSupport {
   import DefaultJsonProtocol._
 
   implicit val userJsonFormat = jsonFormat4(User)
+
+  implicit val userpostJsonFormat = jsonFormat3(UserPost)
   
   implicit val usersJsonFormat = jsonFormat1(Users)
 

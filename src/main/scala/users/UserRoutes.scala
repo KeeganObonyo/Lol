@@ -1,4 +1,4 @@
-package server
+package users
 
 import akka.actor.{ ActorRef, ActorSystem }
 import akka.event.Logging
@@ -14,7 +14,7 @@ import akka.http.scaladsl.server.directives.RouteDirectives.complete
 import akka.http.scaladsl.server.directives.PathDirectives.path
 
 import scala.concurrent.Future
-import server.UserRegistryActor._
+import users.UserRegistryActor._
 import akka.pattern.ask
 import akka.util.Timeout
 
@@ -34,7 +34,7 @@ trait UserRoutes extends JsonSupport {
   implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
 
 
-  private def ModelTorow(user:User): Array[Any] = {
+  private def ModelTorow(user:UserPost): Array[Any] = {
       Array(
         user.name,
         user.age,
@@ -47,7 +47,6 @@ trait UserRoutes extends JsonSupport {
   lazy val userRoutes: Route =
     pathPrefix("users") {
       concat(
-        //#users-get-delete
         pathEnd {
           concat(
             get {
@@ -56,7 +55,7 @@ trait UserRoutes extends JsonSupport {
               complete(users)
             },
             post {
-              entity(as[User]) { user =>
+              entity(as[UserPost]) { user =>
                 val userCreated =
                   (userRegistryActor ? CreateUser(ModelTorow(user)))
                 onSuccess(userCreated) { performed =>

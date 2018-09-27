@@ -12,6 +12,7 @@ import scala.io.StdIn
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
 import models._
+import users._
 
 //#main-class
 object LolServer extends App with UserRoutes {

@@ -1,4 +1,4 @@
-package server
+package users
 
 //#user-registry-actor
 import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
@@ -13,6 +13,8 @@ import akka.pattern.pipe
 
 //#user-case-classes
 final case class User(id: Int, name: String, age: Int, countryOfResidence: String)
+
+final case class UserPost(name: String, age: Int, countryOfResidence: String)
 
 final case class Users(users: List[User])
 

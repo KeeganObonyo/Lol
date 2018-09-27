@@ -3,7 +3,7 @@ package models
 import com.github.mauricio.async.db.util.ExecutorServiceUtils.CachedExecutionContext
 import com.github.mauricio.async.db.{RowData, QueryResult}
 import scala.concurrent.Future
-import server.{User,Users}
+import users.{User,Users}
 
 
 trait DbQueries {
