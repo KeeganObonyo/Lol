@@ -16,11 +16,20 @@ libraryDependencies ++= Seq(
 
 "com.github.mauricio" %% "postgresql-async" % "0.2.21",
 
-"ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime
+"ch.qos.logback" % "logback-classic" % "1.1.3" % Runtime,
+
+"de.heikoseeberger" %% "akka-http-circe"     % "1.17.0",
+
+"com.jason-goodwin" %% "authentikat-jwt"     % "0.4.5",
+
+"io.circe"          %% "circe-generic"       % "0.8.0",
+
+"org.scalacheck"    %% "scalacheck"          % "1.13.5",
+
+"org.scalatest" %% "scalatest" % "3.0.3"
 
 // "com.h2database" % "h2" % "1.2.137",
 
 // "org.squeryl" % "squeryl_2.10" % "0.9.5-6"
 
 )
-
