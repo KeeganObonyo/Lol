@@ -23,13 +23,9 @@ object LolServer extends App with UserRoutes {
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
-  //#server-bootstrapping
 
   val userRegistryActor: ActorRef = system.actorOf(Props[UserRegistryActor], "userRegistryActor")
 
-  //#main-class
-  // from the UserRoutes trait
-  // lazy val routes: Route = userRoutes
 
   lazy val homeRoute: Route =
       path("") {
@@ -41,7 +37,6 @@ object LolServer extends App with UserRoutes {
       }
 
   lazy val routes: Route = concat(userRoutes,homeRoute)
-  //#main-class
 
   //#http-server
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
@@ -55,6 +50,4 @@ object LolServer extends App with UserRoutes {
 
   Await.result(system.whenTerminated, Duration.Inf)
   //#http-server
-  //#main-class
 }
-//#main-class

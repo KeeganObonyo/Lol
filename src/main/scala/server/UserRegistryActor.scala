@@ -25,13 +25,12 @@ object UserRegistryActor {
   final case class DeleteUser(name: String)
 
 }
-//TODO: fix timeout bug while accessing the UserRegistryActor exiting with an internal server error
 
 class UserRegistryActor extends Actor with ActorLogging {
   
   import UserRegistryActor._
 
-  val databaseinstance = BasicDataBase()
+  val databaseinstance = DbTransactions()
 
   def receive: Receive = {
     case GetUsers =>
@@ -44,4 +43,3 @@ class UserRegistryActor extends Actor with ActorLogging {
       sender ! databaseinstance.deleteUser(id)
     }
   }
-//#user-registry-actor
