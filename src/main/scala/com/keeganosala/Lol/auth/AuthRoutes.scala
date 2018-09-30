@@ -61,9 +61,16 @@ trait AuthRoutes extends JsonSupport {
     //   }
     // }
       val user = (authenticationActor ? GetUserInstance(ModelTorow(loginreq))).mapTo[UserInstance]
-      complete(user)
+      if (user.id == 0) {
+        complete(StatusCodes.Unauthorized)
+      }else{
+        val claims = setClaims(user, tokenExpiryPeriodInDays)
+        respondWithHeader(RawHeader("Access-Token", JsonWebToken(header, claims, secretKey))) {
+          complete(StatusCodes.OK)
+        }
       }
     }
+  }
 
   private def checkvalidity = get {
     authenticated { claims =>
