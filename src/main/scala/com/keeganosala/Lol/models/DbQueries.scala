@@ -50,8 +50,7 @@ trait DbQueries {
   }
 
   def getUserInstance(args:Array[Any]) = {
-  	println(args)
-    val queryResult = connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)", Array(args))
+    val queryResult = connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)",args)
     queryResult.map { result => 
       	result.rows match {
       		case Some(row) => val listy = row.toList map (x => rowToModelUserInstance(x));Left(listy(0))
