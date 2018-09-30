@@ -53,7 +53,7 @@ trait DbQueries {
     val queryResult = connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)",args)
     queryResult.map { result => 
       	result.rows match {
-      		case Some(row) => val listy = row.toList map (x => rowToModelUserInstance(x));Left(listy(0))
+      		case Some(row) => val listy = row.toList map (x => rowToModelUserInstance(x));listy(0)
       		case None => UserInstance(id = 0, name = "", email = "" , password = "")
       	}
       }
