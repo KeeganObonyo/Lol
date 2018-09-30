@@ -3,6 +3,8 @@ package auth
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
 import spray.json.DefaultJsonProtocol
+import users._
+
 
 trait JsonSupport extends SprayJsonSupport {
   
@@ -10,4 +12,7 @@ trait JsonSupport extends SprayJsonSupport {
 
   implicit val loginRequestJsonFormat = jsonFormat2(LoginRequest)
   
+  implicit val userinstanceJsonFormat = jsonFormat4(UserInstance)
+
 }
+

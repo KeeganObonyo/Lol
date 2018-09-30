@@ -3,7 +3,7 @@ package auth
 
 import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
 import scala.concurrent.{Await, Future}
-import scala.concurrent.ExecutionContext.Implicits.global
+// import scala.concurrent.ExecutionContext.Implicits.global
 import akka.pattern.ask
 import models._
 import users._
@@ -19,9 +19,10 @@ object AuthenticationActor {
 	final case class GetUserInstance(request:Array[Any])
 }
 
-class AuthenticationActor extends Actor with ActorLogging{
+class AuthenticationActor extends Actor with ActorLogging {
 
 	import AuthenticationActor._
+	import context.dispatcher
 
   val databaseinstance = DbTransactions()
 
