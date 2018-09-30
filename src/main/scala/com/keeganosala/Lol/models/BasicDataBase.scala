@@ -1,3 +1,4 @@
+package com.keeganosala.Lol
 package models
 
 import com.github.mauricio.async.db.postgresql.PostgreSQLConnection

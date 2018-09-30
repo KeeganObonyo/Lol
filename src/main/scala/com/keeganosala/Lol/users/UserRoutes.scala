@@ -1,3 +1,4 @@
+package com.keeganosala.Lol
 package users
 
 import akka.actor.{ ActorRef, ActorSystem }
@@ -18,20 +19,15 @@ import users.UserRegistryActor._
 import akka.pattern.ask
 import akka.util.Timeout
 
-//#user-routes-class
 trait UserRoutes extends JsonSupport {
-  //#user-routes-class
 
-  // we leave these abstract, since they will be provided by the App
   implicit def system: ActorSystem
 
   lazy val log = Logging(system, classOf[UserRoutes])
 
-  // other dependencies that UserRoutes use
   def userRegistryActor: ActorRef
 
-  // Required by the `ask` (?) method below
-  implicit lazy val timeout = Timeout(5.seconds) // usually we'd obtain the timeout from the system's configuration
+  implicit lazy val timeout = Timeout(5.seconds)
 
 
   private def ModelTorow(user:UserPost): Array[Any] = {
@@ -41,9 +37,7 @@ trait UserRoutes extends JsonSupport {
         user.password
       )
     }
-  //#all-routes
-  //#users-get-post
-  //#users-get-delete   
+    
   lazy val userRoutes: Route =
     pathPrefix("users") {
       concat(
@@ -66,33 +60,25 @@ trait UserRoutes extends JsonSupport {
             }
           )
         },
-        //#users-get-post
-        //#users-get-delete
         path(Segment) { id =>
           concat(
             get {
-              //#retrieve-user-info
               val maybeUser: Future[User] =
                 (userRegistryActor ? GetUser(id)).mapTo[User]
               rejectEmptyResponse {
                 complete(maybeUser)
               }
-              //#retrieve-user-info
             },
             delete {
-              //#users-delete-logic
               val userDeleted =
                 (userRegistryActor ? DeleteUser(id))
               onSuccess(userDeleted) { performed =>
                 log.info("Deleted user")
                 complete((StatusCodes.OK))
               }
-              //#users-delete-logic
             }
           )
         }
       )
-      //#users-get-delete
     }
-  //#all-routes
 }

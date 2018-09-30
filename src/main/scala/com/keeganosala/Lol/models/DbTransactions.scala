@@ -1,3 +1,4 @@
+package com.keeganosala.Lol
 package models
 
 object DbTransactions {

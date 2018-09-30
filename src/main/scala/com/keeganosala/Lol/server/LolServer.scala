@@ -1,3 +1,4 @@
+package com.keeganosala.Lol
 package server
 
 //#quick-start-server
@@ -16,18 +17,17 @@ import models._
 import users._
 import auth._
 
-//#main-class
 object LolServer extends App with UserRoutes with AuthRoutes {
 
-  // set up ActorSystem and other dependencies here
-  //#main-class
-  //#server-bootstrapping
   implicit val system: ActorSystem = ActorSystem("LolHttpServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
   implicit val executionContext = system.dispatcher
 
 
   val userRegistryActor: ActorRef = system.actorOf(Props[UserRegistryActor], "userRegistryActor")
+
+  val authenticationActor: ActorRef = system.actorOf(Props[AuthenticationActor], "authenticationActor")
+
 
   lazy val homeRoute: Route =
       path("") {
@@ -40,16 +40,14 @@ object LolServer extends App with UserRoutes with AuthRoutes {
 
   lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes)
 
-  //#http-server
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
 
   println(s"Server online at http://localhost:8000/\nPress Enter to stop...")
 
-  StdIn.readLine() // let it run until user presses return
+  StdIn.readLine()
   bindingFuture
-      .flatMap(_.unbind()) // trigger unbinding from the port
-      .onComplete(_ => system.terminate()) // and shutdown when done
+      .flatMap(_.unbind())
+      .onComplete(_ => system.terminate())
 
   Await.result(system.whenTerminated, Duration.Inf)
-  //#http-server
 }

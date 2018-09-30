@@ -1,9 +1,11 @@
+package com.keeganosala.Lol
 package models
 
 import com.github.mauricio.async.db.util.ExecutorServiceUtils.CachedExecutionContext
 import com.github.mauricio.async.db.{RowData, QueryResult}
 import scala.concurrent.Future
-import users.{User,Users}
+import users.{User,Users,UserInstance}
+import auth.LoginRequest
 
 
 trait DbQueries {
@@ -12,7 +14,7 @@ trait DbQueries {
 
 	def getUsers()= {
 
-    connection.sendQuery("SELECT * FROM users").map { queryResult => 
+    connection.sendQuery("SELECT id, name, email  FROM users").map { queryResult => 
       queryResult.rows match {
         case Some(rows) => rowToModelList(rows.toList)
         case None => Nil
@@ -31,7 +33,7 @@ trait DbQueries {
 
   def getUser(args:String)= {
 
-    connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE id = ?", Array(args)).map { 
+    connection.sendPreparedStatement("SELECT id, name, email FROM users WHERE id = ?", Array(args)).map { 
       queryResult => 
       queryResult.rows match {
         case Some(row) => {
@@ -39,16 +41,34 @@ trait DbQueries {
           try{
             listy(0)
           } catch {
-            case _:Throwable => User(id = 0, name = "", email = "", password = "")
+            case _:Throwable => User(id = 0, name = "", email = "")
           }
         }
-        case None => User(id = 0, name = "", email = "", password = "")
+        case None => User(id = 0, name = "", email = "")
       }
     }
   }
 
+  def getUserInstance(args:Array[Any]) = {
+  	println(args)
+    val queryResult = connection.sendPreparedStatement("SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)", Array(args))
+    queryResult.map { result => 
+      	result.rows match {
+      		case Some(row) => val listy = row.toList map (x => rowToModelUserInstance(x));Left(listy(0))
+      		case None => UserInstance(id = 0, name = "", email = "" , password = "")
+      	}
+      }
+    }
+
   private def rowToModel(row: RowData): User = {
       new User(
+        id        = row(0).asInstanceOf[Int],
+        name       = row(1).asInstanceOf[String],
+        email        = row(2).asInstanceOf[String]
+      )
+    }
+  private def rowToModelUserInstance(row: RowData): UserInstance = {
+      new UserInstance(
         id        = row(0).asInstanceOf[Int],
         name       = row(1).asInstanceOf[String],
         email        = row(2).asInstanceOf[String],
@@ -61,3 +81,4 @@ trait DbQueries {
       )
   }
 }
+
