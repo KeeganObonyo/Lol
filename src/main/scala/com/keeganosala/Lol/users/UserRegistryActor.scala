@@ -21,6 +21,9 @@ final case class UserPost(name: String, email: String, password: String)
 
 final case class Users(users: List[User])
 
+final case class LoginRequest(email: String, password: String)
+
+
 
 object UserRegistryActor {
   final case class ActionPerformed(description: String)
