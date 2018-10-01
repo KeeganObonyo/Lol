@@ -27,7 +27,6 @@ class AuthenticationActor extends Actor with ActorLogging {
   val databaseinstance = DbTransactions()
 
 	def receive: Receive = {
-		case GetUserInstance(request) =>
-			databaseinstance.getUserInstance(request).mapTo[UserInstance] pipeTo sender
+		case GetUserInstance(request) => databaseinstance.getUserInstance(request).mapTo[UserInstance] pipeTo sender
 	}
 }

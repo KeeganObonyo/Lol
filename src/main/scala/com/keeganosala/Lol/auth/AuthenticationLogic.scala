@@ -2,6 +2,7 @@ package com.keeganosala.Lol
 package auth 
 
 import java.util.concurrent.TimeUnit
+import scala.util.{Try, Success, Failure}
 
 import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model.StatusCodes
@@ -10,7 +11,6 @@ import akka.http.scaladsl.server.{ Directive1, Route,Directives }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.pattern._
-import users._
 import users._
 import models._
 import auth.AuthenticationActor._
@@ -24,6 +24,7 @@ import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
 import akka.http.scaladsl.unmarshalling.Unmarshal
+import scala.collection.mutable.ListBuffer
 
 trait AuthenticationLogic {
 
@@ -48,8 +49,7 @@ trait AuthenticationLogic {
       )
     }
 
-  def returnToken(request:LoginRequest) = {
-    val user = (authenticationActor ? GetUserInstance(ModelTorow(request))).mapTo[UserInstance]
+  def returnToken(user:UserInstance): String ={
     JsonWebToken(header, setClaims(user, tokenExpiryPeriodInDays), secretKey)
   }
 
@@ -70,7 +70,7 @@ trait AuthenticationLogic {
       case _ => complete(StatusCodes.Unauthorized)
     }
 
-  def setClaims(user: Future[UserInstance], expiryPeriodInDays: Long) = JwtClaimsSet(
+  def setClaims(user: UserInstance, expiryPeriodInDays: Long) = JwtClaimsSet(
     Map("user" -> user,
         "expiredAt" -> (System.currentTimeMillis() + TimeUnit.DAYS
           .toMillis(expiryPeriodInDays)))

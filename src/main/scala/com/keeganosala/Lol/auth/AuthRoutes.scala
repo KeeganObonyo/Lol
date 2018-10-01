@@ -14,27 +14,24 @@ import users._
 import models._
 import auth.AuthenticationActor._
 
-import users.UserRegistryActor._
-import akka.pattern.ask
-import scala.concurrent.duration._
-import akka.util.Timeout
 import scala.util.{Failure,Success}
-import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
-import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.http.scaladsl.unmarshalling.Unmarshal
 
 trait AuthRoutes extends JsonSupport with AuthenticationLogic{
 
   def login = post {
     entity(as[LoginRequest]) { 
       loginreq =>
-      val token = returnToken(loginreq)
-        respondWithHeader(RawHeader("Access-Token", token)) {
+      onComplete((authenticationActor ? GetUserInstance(ModelTorow(loginreq))).mapTo[UserInstance]) {
+        case Success(user) => 
+        respondWithHeader(RawHeader("Access-Token", returnToken(user))) {
           complete(StatusCodes.OK)
         }
+        case Failure(exception) => 
+          complete(StatusCodes.BadRequest)
       }
     }
+  }
 
   lazy val authRoutes: Route = path("auth"){
   	login ~ checkvalidity
