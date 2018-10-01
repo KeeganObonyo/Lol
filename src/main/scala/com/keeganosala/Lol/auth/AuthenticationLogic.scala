@@ -50,44 +50,50 @@ trait AuthenticationLogic {
     }
 
   def returnToken(user:UserInstance): String ={
-    JsonWebToken(header, setClaims(user, tokenExpiryPeriodInDays), secretKey)
+    val claims = setClaims(user, tokenExpiryPeriodInDays)
+    JsonWebToken(header, claims, secretKey)
   }
 
   def checkvalidity = get {
     authenticated { claims =>
-      complete(s"User ${claims.getOrElse("user", "")} authentication still valid!")
+      complete(s"authentication still valid!")
     }
   }
 
   private def authenticated: Directive1[Map[String, Any]] =
     optionalHeaderValueByName("Authorization").flatMap {
-      case Some(jwt) if isTokenExpired(jwt) =>
-        complete(StatusCodes.Unauthorized -> "Token expired.")
-
       case Some(jwt) if JsonWebToken.validate(jwt, secretKey) =>
-        provide(getClaims(jwt).getOrElse(Map.empty[String, Any]))
-
+        if (isTokenExpired(jwt)) {
+            complete(StatusCodes.Unauthorized -> "Token expired.")
+        }else{
+            provide(Map("Authorization" -> jwt))
+        }
       case _ => complete(StatusCodes.Unauthorized)
     }
 
-  def setClaims(user: UserInstance, expiryPeriodInDays: Long) = JwtClaimsSet(
+  private def setClaims(user: UserInstance, expiryPeriodInDays: Long) = JwtClaimsSet(
     Map("user" -> user,
         "expiredAt" -> (System.currentTimeMillis() + TimeUnit.DAYS
           .toMillis(expiryPeriodInDays)))
   )
 
-  private def getClaims(jwt: String) = jwt match {
-    case JsonWebToken(_, claims, _) => claims.asSimpleMap.toOption
-    case _                          => None
+  private def getUserfomtoken(jwt: String) = {
+    getClaims(jwt) match {
+        case Success(value) => value("user")
+        case Failure(_) => false
+    }
+
   }
 
-  private def isTokenExpired(jwt: String) = getClaims(jwt) match {
-    case Some(claims) =>
-      claims.get("expiredAt") match {
-        case Some(value) => value.toLong < System.currentTimeMillis()
-        case None        => false
-      }
-    case None => false
+  private def getClaims(jwt:String) = {
+      JsonWebToken.unapply(jwt).get._2.asSimpleMap
+  }
+
+  private def isTokenExpired(jwt: String) = {
+     getClaims(jwt) match {
+        case Success(value) => value("expiredAt").toLong < System.currentTimeMillis()
+        case Failure(_) => false
+    }
   }
 
 }
