@@ -40,7 +40,7 @@ trait AuthenticationLogic {
     }
   }
 
-  private def authenticated: Directive1[Map[String, Any]] =
+  def authenticated: Directive1[Map[String, Any]] =
     optionalHeaderValueByName("Authorization").flatMap {
       case Some(jwt) if JsonWebToken.validate(jwt, secretKey) =>
         if (isTokenExpired(jwt)) {
@@ -77,3 +77,4 @@ trait AuthenticationLogic {
   }
 
 }
+
