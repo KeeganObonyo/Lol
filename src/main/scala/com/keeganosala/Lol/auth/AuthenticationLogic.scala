@@ -2,37 +2,24 @@ package com.keeganosala.Lol
 package auth 
 
 import java.util.concurrent.TimeUnit
-import scala.util.{Try, Success, Failure}
 
-import akka.http.scaladsl.Http.ServerBinding
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.model.headers.RawHeader
 import akka.http.scaladsl.server.{ Directive1, Route,Directives }
 import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
 import akka.pattern._
-import users._
-import models._
-import auth.AuthenticationActor._
 
-import users.UserRegistryActor._
 import akka.pattern.ask
-import scala.concurrent.duration._
-import akka.util.Timeout
 import scala.util.{Failure,Success}
-import akka.actor.{ ActorRef, Actor, ActorLogging, Props, ActorSystem}
 import scala.concurrent.{Await, Future}
 import scala.concurrent.ExecutionContext.Implicits.global
-import akka.http.scaladsl.unmarshalling.Unmarshal
 import scala.collection.mutable.ListBuffer
 
+import users._
+import models._
+
 trait AuthenticationLogic {
-
-  implicit def system: ActorSystem
-
-  def authenticationActor: ActorRef
-
-  implicit lazy val time = Timeout(5.seconds)
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
@@ -41,13 +28,6 @@ trait AuthenticationLogic {
   private val tokenExpiryPeriodInDays = 1
   private val header                  = JwtHeader("HS256")
   private val secretKey               = "sgdhfjghjk[p';hgubiugh67@@#&*()$"
-
-  def ModelTorow(loginrequest:LoginRequest): Array[Any] = {
-      Array(
-        loginrequest.email,
-        loginrequest.password
-      )
-    }
 
   def returnToken(user:UserInstance): String ={
     val claims = setClaims(user, tokenExpiryPeriodInDays)

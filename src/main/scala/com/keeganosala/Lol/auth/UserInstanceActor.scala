@@ -14,14 +14,14 @@ import akka.pattern.pipe
 
 final case class LoginRequest(email: String, password: String)
 
-object AuthenticationActor {
+object UserInstanceActor {
 
 	final case class GetUserInstance(request:Array[Any])
 }
 
-class AuthenticationActor extends Actor with ActorLogging {
+class UserInstanceActor extends Actor with ActorLogging {
 
-	import AuthenticationActor._
+	import UserInstanceActor._
 	import context.dispatcher
 
   val databaseinstance = DbTransactions()

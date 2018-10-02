@@ -26,7 +26,7 @@ object LolServer extends App with UserRoutes with AuthRoutes {
 
   val userRegistryActor: ActorRef = system.actorOf(Props[UserRegistryActor], "userRegistryActor")
 
-  val authenticationActor: ActorRef = system.actorOf(Props[AuthenticationActor], "authenticationActor")
+  val userInstanceActor: ActorRef = system.actorOf(Props[UserInstanceActor], "userInstanceActor")
 
 
   lazy val homeRoute: Route =
