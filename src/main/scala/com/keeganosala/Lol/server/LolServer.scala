@@ -16,8 +16,9 @@ import akka.http.scaladsl.model.StatusCodes
 import models._
 import users._
 import auth._
+import data._
 
-object LolServer extends App with UserRoutes with AuthRoutes {
+object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
 
   implicit val system: ActorSystem = ActorSystem("LolHttpServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -38,11 +39,11 @@ object LolServer extends App with UserRoutes with AuthRoutes {
         }
       }
 
-  lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes)
+  lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes,dataRoutes)
 
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
 
-  println(s"Server online at http://localhost:8000/\nPress Enter to stop...")
+  println(s"Server online at http://localhost:8000\nPress Enter to stop...")
 
   StdIn.readLine()
   bindingFuture
