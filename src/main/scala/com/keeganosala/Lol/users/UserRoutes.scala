@@ -18,6 +18,7 @@ import scala.concurrent.Future
 import users.UserRegistryActor._
 import akka.pattern.ask
 import akka.util.Timeout
+import auth._
 
 trait UserRoutes extends JsonSupport {
 
@@ -29,6 +30,7 @@ trait UserRoutes extends JsonSupport {
 
   implicit lazy val timeout = Timeout(5.seconds)
 
+  val authlogicinstance = AuthLogic()
 
   private def ModelTorow(user:UserPost): Array[Any] = {
       Array(
@@ -44,9 +46,11 @@ trait UserRoutes extends JsonSupport {
         pathEnd {
           concat(
             get {
-              val users: Future[Users] =
-                (userRegistryActor ? GetUsers).mapTo[Users]
-              complete(users)
+              authlogicinstance.authenticated { claims => 
+                val users: Future[Users] =
+                  (userRegistryActor ? GetUsers).mapTo[Users]
+                complete(users)
+              }
             },
             post {
               entity(as[UserPost]) { userp =>
@@ -63,18 +67,22 @@ trait UserRoutes extends JsonSupport {
         path(Segment) { id =>
           concat(
             get {
-              val maybeUser: Future[User] =
-                (userRegistryActor ? GetUser(id)).mapTo[User]
-              rejectEmptyResponse {
-                complete(maybeUser)
+              authlogicinstance.authenticated { claims => 
+                val maybeUser: Future[User] =
+                  (userRegistryActor ? GetUser(id)).mapTo[User]
+                rejectEmptyResponse {
+                  complete(maybeUser)
+                }
               }
             },
             delete {
-              val userDeleted =
-                (userRegistryActor ? DeleteUser(id))
-              onSuccess(userDeleted) { performed =>
-                log.info("Deleted user")
-                complete((StatusCodes.OK))
+              authlogicinstance.authenticated { claims =>
+                val userDeleted =
+                  (userRegistryActor ? DeleteUser(id))
+                onSuccess(userDeleted) { performed =>
+                  log.info("Deleted user")
+                  complete((StatusCodes.OK))
+                }
               }
             }
           )
