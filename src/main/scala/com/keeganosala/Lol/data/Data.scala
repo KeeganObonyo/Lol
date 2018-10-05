@@ -12,25 +12,25 @@ import scala.concurrent.ExecutionContext.Implicits.global
 
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
+import akka.http.scaladsl.model._, headers.HttpEncodings
+import akka.http.scaladsl.unmarshalling.Unmarshal
 
-
-trait Data {
+trait Data extends AutoMarshalling {
 
 	implicit val system: ActorSystem
 
 	implicit def materializer: ActorMaterializer
 
-	def getData() {
+  val url = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=KLMH2VFJ0LCFNOX5"
 
-    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri ="https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=MSFT&interval=1min&apikey=KLMH2VFJ0LCFNOX5"))
+	def getData():Future[AlphavantageData] = {
+    val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = url))
 
-    responseFuture
-      .onComplete { 
-        case Success(response) => 
-        	println(response)
-        	response.discardEntityBytes() 
-        case Failure(_)   => sys.error("something wrong")
+    responseFuture flatMap  { response =>
+      Unmarshal(response.entity).to[AlphavantageData] map { alphavantagedata =>
+        alphavantagedata
       }
+    }
 
 	}
 }

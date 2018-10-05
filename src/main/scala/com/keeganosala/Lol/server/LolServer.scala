@@ -29,6 +29,8 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
 
   val userInstanceActor: ActorRef = system.actorOf(Props[UserInstanceActor], "userInstanceActor")
 
+  val dataAccessActor: ActorRef = system.actorOf(Props[DataAccessActor], "dataAccessActor")
+
 
   lazy val homeRoute: Route =
       path("") {
@@ -41,7 +43,7 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
 
   lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes,dataRoutes)
 
-  val bindingFuture = Http().bindAndHandle(routes, "localhost", 8000)
+  val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
 
   println(s"Server online at http://localhost:8000\nPress Enter to stop...")
 
