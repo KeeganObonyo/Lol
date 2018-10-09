@@ -14,31 +14,50 @@ import akka.http.scaladsl.server.{ Directive1, Route,Directives }
 import akka.http.scaladsl.server.Directives._
 import akka.pattern.ask
 
-import data.DataAccessActor._
+import data.ComputationsActor._
 
 
 
-trait DataRoutes {
+trait DataRoutes extends AutoMarshalling{
 
   implicit def system: ActorSystem
 
-  def dataAccessActor: ActorRef
+  def computationsActor: ActorRef
 
   implicit lazy val timedelta = Timeout(5.seconds)
 
-  def getdata = get {
-  	onComplete((dataAccessActor ? GetData)) { 
-  		case Success(data) => 
-  			// println(data)
-  			complete(StatusCodes.OK)
-  		case Failure(e) => 
-  			// println(e)
-  			complete(StatusCodes.OK)
-		}
+  	def getdata = get {
+	  	rejectEmptyResponse {
+	  	onComplete((computationsActor ? GetGraph))  { 
+	  		case Success(data) => 
+	  			complete(data.asInstanceOf[Map[String,Map[String,String]]])
+	  		case Failure(e) => 
+	  			println(e)
+	  			complete(StatusCodes.BadRequest)
+				}
+			}
 	}
 
-  lazy val dataRoutes: Route = path("data"){ 
-  	getdata 
-  }
+
+	def compute = get {
+	  	rejectEmptyResponse {
+	  	onComplete((computationsActor ? GetVolatility))  { 
+	  		case Success(data) => 
+	  			complete(data.asInstanceOf[Map[String,String]])
+	  		case Failure(e) => 
+	  			complete(StatusCodes.BadRequest)
+				}
+			}
+	}
+
+  lazy val dataRoutes: Route = pathPrefix("data"){ 
+  	concat(
+  		path("get"){
+  		getdata 
+  	},
+  		path("compute"){
+  		compute
+  		})
+  	}
 
 }

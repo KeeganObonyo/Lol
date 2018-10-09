@@ -15,6 +15,12 @@ import scala.util.{ Failure, Success }
 import akka.http.scaladsl.model._, headers.HttpEncodings
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
+case class AlphavantageData(
+  `Meta Data`: Map[String,String],
+  `Time Series (1min)`: Map[String,Map[String,String]]
+)
+
+
 trait Data extends AutoMarshalling {
 
 	implicit val system: ActorSystem

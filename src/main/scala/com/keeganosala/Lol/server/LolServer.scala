@@ -29,7 +29,7 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
 
   val userInstanceActor: ActorRef = system.actorOf(Props[UserInstanceActor], "userInstanceActor")
 
-  val dataAccessActor: ActorRef = system.actorOf(Props[DataAccessActor], "dataAccessActor")
+  val computationsActor: ActorRef = system.actorOf(Props[ComputationsActor], "computationsActor")
 
 
   lazy val homeRoute: Route =
