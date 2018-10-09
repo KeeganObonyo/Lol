@@ -16,7 +16,7 @@ import akka.http.scaladsl.model._, headers.HttpEncodings
 import akka.http.scaladsl.unmarshalling.Unmarshal
 
 case class AlphavantageData(
-  `Meta Data`: Map[String,String],
+  // `Meta Data`: Map[String,String],
   `Time Series (1min)`: Map[String,Map[String,String]]
 )
 

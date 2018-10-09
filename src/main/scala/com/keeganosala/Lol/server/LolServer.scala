@@ -18,7 +18,7 @@ import users._
 import auth._
 import data._
 
-object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
+object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes with CORSHandler {
 
   implicit val system: ActorSystem = ActorSystem("LolHttpServer")
   implicit val materializer: ActorMaterializer = ActorMaterializer()
@@ -41,11 +41,13 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes {
         }
       }
 
-  lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes,dataRoutes)
+  lazy val routes: Route = corsHandler {
+   concat(userRoutes,homeRoute,authRoutes,dataRoutes)
+ }
 
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
 
-  println(s"Server online at http://localhost:8000\nPress Enter to stop...")
+  println(s"Server online at http://localhost:8080\nPress Enter to stop...")
 
   StdIn.readLine()
   bindingFuture
