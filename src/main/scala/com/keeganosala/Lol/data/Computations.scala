@@ -86,14 +86,13 @@ trait Computations extends AutoMarshalling {
 	}
 
 	def coMputeAndMerge:Map[String,Double] = {
-		var marketVolatility = scala.collection.mutable.Map[String,Double]()
-		marketVolatility += ("high" -> computeData(high.toList))
-		marketVolatility += ("low" -> computeData(low.toList))
-		marketVolatility += ("open" -> computeData(open.toList))
-		marketVolatility += ("close" -> computeData(close.toList))
-		marketVolatility += ("volume" -> computeData(volume.toList))
-		marketVolatility.toMap
-
+		Map[String,Double](
+		"high" -> computeData(high.toList),
+		"low" -> computeData(low.toList),
+		"open" -> computeData(open.toList),
+		"close" -> computeData(close.toList),
+		"volume" -> computeData(volume.toList)
+		)
 	}
 }
 
