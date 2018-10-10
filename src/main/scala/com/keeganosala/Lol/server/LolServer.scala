@@ -41,9 +41,8 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes wit
         }
       }
 
-  lazy val routes: Route = corsHandler {
-   concat(userRoutes,homeRoute,authRoutes,dataRoutes)
- }
+  lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes,dataRoutes)
+ 
 
   val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
 

@@ -18,11 +18,12 @@ import akka.pattern._
 
 import users._
 import models._
+import server._
 import auth.UserInstanceActor._
 
 
 
-trait AuthRoutes extends JsonSupport with AuthenticationLogic{
+trait AuthRoutes extends JsonSupport with AuthenticationLogic with CORSHandler {
 
   implicit def system: ActorSystem
 
@@ -38,19 +39,19 @@ trait AuthRoutes extends JsonSupport with AuthenticationLogic{
       )
     }
 
-  def login = post {
+  def login = corsHandler (post {
     entity(as[LoginRequest]) { 
       loginreq =>
       onComplete((userInstanceActor ? GetUserInstance(ModelTorow(loginreq))).mapTo[UserInstance]) {
         case Success(user) => 
         respondWithHeader(RawHeader("Access-Token", returnToken(user))) {
-          complete(StatusCodes.OK)
+          complete(new Token(token = returnToken(user)))
         }
         case Failure(exception) => 
           complete(StatusCodes.BadRequest)
       }
     }
-  }
+  })
 
   lazy val authRoutes: Route = path("auth"){
   	login ~ checkvalidity

@@ -33,7 +33,6 @@ trait Computations extends AutoMarshalling {
   	var close = ListBuffer[Double]()
   	var volume = ListBuffer[Double]()
   	var graph = Map[String,Map[String,String]]()
-	// graph += ("graph" -> Map[String,String]())
 
 	def setValues(data:AlphavantageData){
 
@@ -95,6 +94,8 @@ trait Computations extends AutoMarshalling {
 		)
 	}
 }
+
+// BigDecimal(computeData(high.toList)).setScale(2, BigDecimal.RoundingMode.HALF_UP).toDouble
 
 
 

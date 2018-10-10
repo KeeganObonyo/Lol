@@ -19,8 +19,9 @@ import users.UserRegistryActor._
 import akka.pattern.ask
 import akka.util.Timeout
 import auth._
+import server._
 
-trait UserRoutes extends JsonSupport {
+trait UserRoutes extends JsonSupport with CORSHandler{
 
   implicit def system: ActorSystem
 
@@ -40,7 +41,7 @@ trait UserRoutes extends JsonSupport {
       )
     }
     
-  val userRoutes: Route =
+  val userRoutes: Route = corsHandler (
     pathPrefix("users") {
       concat(
         pathEnd {
@@ -88,5 +89,5 @@ trait UserRoutes extends JsonSupport {
           )
         }
       )
-    }
+    })
 }

@@ -16,9 +16,10 @@ import akka.pattern.ask
 
 import data.ComputationsActor._
 
+import server._
 
 
-trait DataRoutes extends AutoMarshalling{
+trait DataRoutes extends AutoMarshalling with CORSHandler{
 
   implicit def system: ActorSystem
 
@@ -26,7 +27,7 @@ trait DataRoutes extends AutoMarshalling{
 
   implicit lazy val timedelta = Timeout(5.seconds)
 
-  	def getdata = get {
+  	def getdata = corsHandler (get {
 	  	rejectEmptyResponse {
 	  	onComplete((computationsActor ? GetGraph))  { 
 	  		case Success(data) => 
@@ -36,10 +37,10 @@ trait DataRoutes extends AutoMarshalling{
 	  			complete(StatusCodes.BadRequest)
 				}
 			}
-	}
+	})
 
 
-	def compute = get {
+	def compute =corsHandler ( get {
 	  	rejectEmptyResponse {
 	  	onComplete((computationsActor ? GetVolatility))  { 
 	  		case Success(data) => 
@@ -48,7 +49,7 @@ trait DataRoutes extends AutoMarshalling{
 	  			complete(StatusCodes.BadRequest)
 				}
 			}
-	}
+	})
 
   lazy val dataRoutes: Route = pathPrefix("data"){ 
   	concat(

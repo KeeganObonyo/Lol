@@ -14,6 +14,8 @@ import akka.pattern.pipe
 
 final case class LoginRequest(email: String, password: String)
 
+final case class Token(token:String)
+
 object UserInstanceActor {
 
 	final case class GetUserInstance(request:Array[Any])
@@ -27,6 +29,7 @@ class UserInstanceActor extends Actor with ActorLogging {
   val databaseinstance = DbTransactions()
 
 	def receive: Receive = {
-		case GetUserInstance(request) => databaseinstance.getUserInstance(request).mapTo[UserInstance] pipeTo sender
+		case GetUserInstance(request) =>
+		 databaseinstance.getUserInstance(request).mapTo[UserInstance] pipeTo sender
 	}
 }

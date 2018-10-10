@@ -18,8 +18,9 @@ import scala.collection.mutable.ListBuffer
 
 import users._
 import models._
+import server._
 
-trait AuthenticationLogic {
+trait AuthenticationLogic extends CORSHandler {
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
@@ -34,11 +35,11 @@ trait AuthenticationLogic {
     JsonWebToken(header, claims, secretKey)
   }
 
-  def checkvalidity = get {
+  def checkvalidity = corsHandler (get {
     authenticated { claims =>
       complete(s"authentication still valid!")
     }
-  }
+  })
 
   def authenticated: Directive1[Map[String, Any]] =
     optionalHeaderValueByName("Authorization").flatMap {
