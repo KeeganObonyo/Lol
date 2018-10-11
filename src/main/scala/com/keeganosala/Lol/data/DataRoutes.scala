@@ -25,7 +25,7 @@ trait DataRoutes extends AutoMarshalling with CORSHandler{
 
   def computationsActor: ActorRef
 
-  implicit lazy val timedelta = Timeout(5.seconds)
+  implicit val timedelta = Timeout(5.seconds)
 
   	def getdata = corsHandler (get {
 	  	rejectEmptyResponse {

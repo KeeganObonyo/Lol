@@ -25,7 +25,7 @@ trait Computations extends AutoMarshalling {
 
   def dataAccessActor: ActorRef
 
-  implicit lazy val timedelta = Timeout(5.seconds)
+  implicit val timedelta = Timeout(5.seconds)
 
   	var high = ListBuffer[Double]()
   	var low = ListBuffer[Double]()
