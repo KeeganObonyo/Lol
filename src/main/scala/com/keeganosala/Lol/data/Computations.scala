@@ -4,6 +4,8 @@ package data
 import scala.util.{Failure,Success}
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.duration._
+import scala.concurrent.Future
+import scala.concurrent.Promise
 import scala.collection.mutable.ListBuffer
 import scala.math._
 
@@ -34,11 +36,9 @@ trait Computations extends AutoMarshalling {
   	var volume = ListBuffer[Double]()
   	var graph = Map[String,Map[String,String]]()
 
-	def setValues(data:AlphavantageData){
+	def setValues(data:AlphavantageData2){
 
-		val timeSeries = data `Time Series (1min)`
-
-		for ((timestap,data) <- timeSeries) {
+		for ((timestap,data) <- data.timedata) {
 			
 			high += data("2. high").toFloat
 			low += data("3. low").toFloat
@@ -49,17 +49,15 @@ trait Computations extends AutoMarshalling {
 
 	}
 
-	def obtainValues(data:AlphavantageData){
-
-		val maPP = data `Time Series (1min)`
-
-		for ((timestap,data) <- maPP) graph += (timestap -> data)
+	def obtainValues(data:AlphavantageData2){
+			for ((timestap,data) <- data.timedata) graph += (timestap -> data)
 	}
 
 	def obtainGraphData = {
 		val latestData = (dataAccessActor ? GetData).mapTo[AlphavantageData]
 		latestData.onComplete{
-	  		case Success(data) => obtainValues(data)
+	  		case Success(data) => obtainValues(
+	  			new AlphavantageData2(timedata = data `Time Series (1min)`))
 	  		case Failure(e) => 
 	  			println(e)
 		}
@@ -69,7 +67,8 @@ trait Computations extends AutoMarshalling {
   	def obtainMarketVolatility:Map[String,Double] = {
 		val latestData = (dataAccessActor ? GetData).mapTo[AlphavantageData]
 		latestData.onComplete{
-	  		case Success(data) => setValues(data)
+	  		case Success(data) => setValues(
+	  			new AlphavantageData2(timedata = data `Time Series (1min)`))
 	  		case Failure(e) => 
 	  			println(e)
 		}

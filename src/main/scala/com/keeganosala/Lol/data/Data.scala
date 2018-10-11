@@ -20,6 +20,10 @@ case class AlphavantageData(
   `Time Series (1min)`: Map[String,Map[String,String]]
 )
 
+case class AlphavantageData2(
+    timedata : Map[String,Map[String,String]]
+)
+
 
 trait Data extends AutoMarshalling {
 
@@ -34,7 +38,7 @@ trait Data extends AutoMarshalling {
 
     responseFuture flatMap  { response =>
       Unmarshal(response.entity).to[AlphavantageData] map { alphavantagedata =>
-        alphavantagedata
+          alphavantagedata
       }
     }
 
