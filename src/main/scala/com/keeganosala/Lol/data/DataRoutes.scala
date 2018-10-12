@@ -17,6 +17,7 @@ import akka.pattern.ask
 import data.ComputationsActor._
 
 import server._
+import auth._
 
 
 trait DataRoutes extends AutoMarshalling with CORSHandler{
@@ -27,7 +28,11 @@ trait DataRoutes extends AutoMarshalling with CORSHandler{
 
   implicit val timedelta = Timeout(5.seconds)
 
+  val authlogicinst = AuthLogic()
+
+
   	def getdata = corsHandler (get {
+  		authlogicinst.authenticated{claims=>
 	  	rejectEmptyResponse {
 	  	onComplete((computationsActor ? GetGraph))  { 
 	  		case Success(data) => 
@@ -37,10 +42,12 @@ trait DataRoutes extends AutoMarshalling with CORSHandler{
 	  			complete(StatusCodes.BadRequest)
 				}
 			}
+		}
 	})
 
 
 	def compute =corsHandler ( get {
+  		authlogicinst.authenticated{claims=>
 	  	rejectEmptyResponse {
 	  	onComplete((computationsActor ? GetVolatility))  { 
 	  		case Success(data) => 
@@ -49,6 +56,8 @@ trait DataRoutes extends AutoMarshalling with CORSHandler{
 	  			complete(StatusCodes.BadRequest)
 				}
 			}
+
+		}
 	})
 
   lazy val dataRoutes: Route = pathPrefix("data"){ 
