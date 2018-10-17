@@ -26,19 +26,14 @@ libraryDependencies ++= Seq(
 
 "org.scalacheck"    %% "scalacheck"          % "1.13.5",
 
-"org.json4s" %% "json4s-core" % "3.3.0",
+"org.json4s" %% "json4s-core" % "3.5.0",
 
-"org.json4s" %% "json4s-jackson" % "3.3.0",
+"org.json4s" %% "json4s-jackson" % "3.5.0",
 
-"org.json4s" %% "json4s-native" % "3.2.11",
+"org.json4s" %% "json4s-native" % "3.5.0",
 
 "org.scalatest" %% "scalatest" % "3.0.3",
 
-"de.heikoseeberger" %% "akka-http-json4s" % "1.4.1"
-
-
-// "com.h2database" % "h2" % "1.2.137",
-
-// "org.squeryl" % "squeryl_2.10" % "0.9.5-6"
+"de.heikoseeberger" %% "akka-http-json4s" % "1.11.0"
 
 )
