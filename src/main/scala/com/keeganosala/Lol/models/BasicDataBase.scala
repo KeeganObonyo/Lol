@@ -11,7 +11,7 @@ import scala.concurrent.duration._
 
 object BasicDataBase {
 
-    val configuration = URLParser.parse("jdbc:postgresql://localhost:5432/lol_database?user=postgres&password=postgres")
+    val configuration = URLParser.parse("jdbc:postgresql://0.0.0.0:*/lol_database?user=docker&password=docker")
 
     val connection: Connection = new PostgreSQLConnection(configuration)
 

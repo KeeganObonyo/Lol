@@ -44,7 +44,7 @@ object LolServer extends App with UserRoutes with AuthRoutes with DataRoutes wit
   lazy val routes: Route = concat(userRoutes,homeRoute,authRoutes,dataRoutes)
  
 
-  val bindingFuture = Http().bindAndHandle(routes, "localhost", 8080)
+  val bindingFuture = Http().bindAndHandle(routes, "0.0.0.0", 8080)
 
   println(s"Server online at http://localhost:8080\nPress Enter to stop...")
 
