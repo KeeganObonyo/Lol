@@ -1,14 +1,73 @@
-name := "LolDB"
-
-organization := "AT"
-
-version := "0.1"
-
-scalaVersion := "2.11.6"
-
-scalacOptions ++= Seq("-unchecked", "-deprecation")
-
 enablePlugins(JavaAppPackaging,JavaServerAppPackaging,sbtdocker.DockerPlugin,DockerComposePlugin)
+
+lazy val sharedSettings = Seq(
+  name := "lol"
+  organization := "com.keeganosala",
+  version      := "0.1.1",
+  scalaVersion := "2.12.6",
+  resolvers    ++= Seq(
+    "Typesafe repository releases" at "http://repo.typesafe.com/typesafe/releases/",
+    "Confluent Maven Repository" at "http://packages.confluent.io/maven/"
+  ),
+  scalacOptions ++= Seq(
+    "-deprecation",
+    "-feature",
+    "-unchecked"
+  )
+)
+
+val akkaVersion      = "2.5.16"
+val akkaHttpVersion  = "10.1.5"
+val scalaTestVersion = "3.0.5"
+lazy val Lol = (project in file("."))
+  .aggregate(core, registration, market, web)
+
+lazy val core = (project in file("core")).
+  settings(
+    sharedSettings,
+    libraryDependencies ++= Seq(
+      "com.github.mauricio" %% "postgresql-async"     % "0.2.21",
+      "ch.qos.logback"      %  "logback-classic"      % "1.1.3" % Runtime,
+      "de.heikoseeberger"   %% "akka-http-circe"      % "1.17.0",
+      "com.jason-goodwin"   %% "authentikat-jwt"      % "0.4.5",
+      "io.circe"            %% "circe-generic"        % "0.8.0",
+      "org.scalacheck"      %% "scalacheck"           % "1.13.5",
+      "org.json4s"          %% "json4s-core"          % "3.5.0",
+      "org.json4s"          %% "json4s-jackson"       % "3.5.0",
+      "org.json4s"          %% "json4s-native"        % "3.5.0",
+      "org.scalatest"       %% "scalatest"            % "3.0.3",
+      "de.heikoseeberger"   %% "akka-http-json4s"     % "1.11.0"
+      "com.typesafe.akka"   %% "akka-http-spray-json" % "10.1.5",
+      "com.typesafe.akka"   %% "akka-stream"          % akkaVersion,
+    )
+  )
+
+lazy val registration = (project in file("registration")).
+  settings(
+    sharedSettings,
+    libraryDependencies ++= Seq(
+
+    )
+  ).dependsOn(core)
+
+lazy val market = (project in file("market")).
+  settings(
+    sharedSettings,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-actor"   % akkaVersion,
+      "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
+    )
+  ).dependsOn(core,registration)
+
+lazy val web = (project in file("web")).
+  settings(
+    sharedSettings,
+    libraryDependencies ++= Seq(
+      "com.typesafe.akka" %% "akka-http"         % "10.1.5",
+      "com.typesafe.akka" %% "akka-http-testkit" % "10.1.5" % Test,
+    )
+  ).dependsOn(core, registration, market)
+
 
 import sbtdocker._
 
@@ -26,4 +85,6 @@ dockerImageCreationTask := docker.value
 
 dockerImageCreationTask := (publishLocal in Docker).value
 
-mainClass in Compile := Some("com.keeganosala.Lol.server.LolServer")
+mainClass in Compile := Some("com.keeganosala.lol.web.Server")
+
+cancelable in Global := true

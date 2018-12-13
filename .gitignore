@@ -1,0 +1,10 @@
+# Compile results
+target/**
+project/project/**
+
+**/target/**
+
+
+# Other stuff
+todo
+.idea
