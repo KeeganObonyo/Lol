@@ -10,7 +10,7 @@ import com.keeganosala._
 
 import lol.core.db.postgres.PostgresDb
 
-import lol.core.db.postgres.service.PostgresDbService.UserDbRetrieve
+import lol.core.db.postgres.service.PostgresDbService.User
 
 private[postgres] object RetrieveUsersMapper extends PostgresDb {
 
@@ -25,7 +25,7 @@ private[postgres] object RetrieveUsersMapper extends PostgresDb {
     }
   }
 
-  private def rowToModel(row: RowData): UserDbRetrieve = {
+  private def rowToModel(row: RowData): User = {
       new User(
         id        = row("id").asInstanceOf[Int],
         name      = row("name").asInstanceOf[String],

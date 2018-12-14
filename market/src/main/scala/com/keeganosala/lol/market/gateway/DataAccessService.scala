@@ -1,10 +1,21 @@
-package com.keeganosala.Lol
-package data
+package com.keeganosala.lol.market
+package gateway
+
+import scala.concurrent.ExecutionContext.Implicits.global
+import scala.util.{ Failure, Success }
+import scala.concurrent.Future
 
 import akka.actor.{ Actor, ActorLogging }
-import akka.pattern.pipe
+import akka.http.scaladsl.unmarshalling.Unmarshal
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model._
 import akka.stream.ActorMaterializer
-import akka.util.Timeout
+
+import com.keeganosala._
+
+import lol.core.config.LolConfig
+
+import marshalling.AlphavantageMarshalling
 
 object DataAccessService {
 
@@ -15,17 +26,19 @@ class DataAccessService extends Actor
 	with ActorLogging 
 	with AlphavantageMarshalling {
 
-	implicit val system = context.system
+	implicit val system 	  = context.system
 
-  	val url             = LolConfig.brokerUrl
+ 	implicit val materializer = ActorMaterializer()
+
+  	val url             	  = LolConfig.brokerUrl
 
 	import DataAccessService._
 	import context.dispatcher
 
 	def receive: Receive = {
-		log.info("processing" + request)
-		val currentSender = sender
-		case request:GetData=>
+		case GetData=>
+			log.info("processing" + GetData)
+			val currentSender = sender
     		val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = url))
 		    responseFuture onComplete {
 		    	case Success(response)=>

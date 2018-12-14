@@ -1,8 +1,9 @@
 package com.keeganosala.lol.web
 
+import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
-import akka.actor.ActorRefFactory
+import akka.actor.ActorSystem
 import akka.actor.Props
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.model.StatusCodes
@@ -12,39 +13,43 @@ import akka.pattern.ask
 
 import com.keeganosala._
 
-import lol.core._
+import lol.core.config.LolConfig
 
-import config.LolConfig
-
-import query._
+import lol.core.query._
 
 import QueryService._
 
-import writer._
+import lol.core.writer._
 
-import RegistryUserDbService._
+import RegisterUserDbService._
 
-import auth._
+import lol.core.util._
+
+import lol.core.util.auth._
 
 import AuthenticationService._
 
-import lol.market._
+import lol.market.computations._
 
-import DataAccessService._
+import ComputationsService._
 
-import lol.web.marshalling._
+case class Token (
+	token:String
+)
 
-import lol.util._
-
-trait WebService extends LolJsonProtocol {
+trait WebService extends LolJsonProtocol 
+	with CorsHandler 
+	with AuthenticationLogic {
   
-  private val dataAccessService      = actorRefFactory.actorOf(Props[DataAccessService])
+  implicit def system: ActorSystem
 
-  private val userRegistryService  	 = actorRefFactory.actorOf(Props[RegistryUserDbService])
+  private val computationsService    = system.actorOf(Props[ComputationsService])
 
-  private val dbQueryService  	     = actorRefFactory.actorOf(Props[QueryService])
+  private val userRegistryService  	 = system.actorOf(Props[RegisterUserDbService])
 
-  private val authenticationService  = actorRefFactory.actorOf(Props[AuthenticationService])
+  private val dbQueryService  	     = system.actorOf(Props[QueryService])
+
+  private val authenticationService  = system.actorOf(Props[AuthenticationService])
 
   implicit val timeout             	 = Timeout(LolConfig.httpRequestTimeout)
 
@@ -52,14 +57,12 @@ trait WebService extends LolJsonProtocol {
   	corsHandler (concat(
   		path("data/get"){
 	  		get {
-		  		authlogicinst.authenticated{claims=>
+		  		authenticated{claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsActor ? GetGraph))  { 
+			  	onComplete((computationsService ? GetGraph))  { 
 			  		case Success(data) => 
-			  			logg.info("SUCCESS")
 			  			complete(data.asInstanceOf[Map[String,Map[String,String]]])
 			  		case Failure(e) => 
-			  			logg.info(e.toString)
 			  			complete(StatusCodes.BadRequest)
 						}
 					}
@@ -68,14 +71,12 @@ trait WebService extends LolJsonProtocol {
   		},
   		path("data/compute"){
 	  		get {
-		  		authlogicinst.authenticated{claims=>
+		  		authenticated{claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsActor ? GetVolatility))  { 
+			  	onComplete((computationsService ? GetVolatility))  { 
 			  		case Success(data) => 
-			  			logg.info("SUCCESS")
 			  			complete(data.asInstanceOf[Map[String,String]])
 			  		case Failure(e) => 
-			  			logg.info(e.toString)
 			  			complete(StatusCodes.BadRequest)
 						}
 					}
@@ -108,9 +109,9 @@ trait WebService extends LolJsonProtocol {
 	        pathEnd {
 	          concat(
 	            get {
-	              authlogicinstance.authenticated { claims => 
-	                val users: Future[Users] =
-	                  (dbQueryService ? GetUsers).mapTo[Users]
+	              authenticated { claims => 
+	                val users: Future[UsersFetchQueryServiceResponse] =
+	                  (dbQueryService ? GetUsers).mapTo[UsersFetchQueryServiceResponse]
 	                complete(users)
 	              }
 	            },
@@ -118,9 +119,7 @@ trait WebService extends LolJsonProtocol {
 	              entity(as[RegisterUser]) { user =>
 	                val userCreated =
 	                  (userRegistryService ? user)
-	                onSuccess(userCreated) { performed =>
 	                  complete((StatusCodes.Created))
-	                }
 	              }
 	            }
 	          )
@@ -128,7 +127,7 @@ trait WebService extends LolJsonProtocol {
 	        path(Segment) { id =>
 	          concat(
 	            get {
-	              authlogicinstance.authenticated { claims => 
+	              authenticated { claims => 
 	                val maybeUser: Future[User] =
 	                  (dbQueryService ? GetUser(id)).mapTo[User]
 	                rejectEmptyResponse {
@@ -137,12 +136,10 @@ trait WebService extends LolJsonProtocol {
 	              }
 	            },
 	            delete {
-	              authlogicinstance.authenticated { claims =>
+	              authenticated { claims =>
 	                val userDeleted =
 	                  (userRegistryService ? DeleteUser(id))
-	                onSuccess(userDeleted) { performed =>
 	                  complete((StatusCodes.OK))
-	                }
 	              }
 	            }
 	          )

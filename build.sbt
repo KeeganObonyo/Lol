@@ -1,7 +1,6 @@
 enablePlugins(JavaAppPackaging,JavaServerAppPackaging,sbtdocker.DockerPlugin,DockerComposePlugin)
 
 lazy val sharedSettings = Seq(
-  name := "lol"
   organization := "com.keeganosala",
   version      := "0.1.1",
   scalaVersion := "2.12.6",
@@ -19,8 +18,8 @@ lazy val sharedSettings = Seq(
 val akkaVersion      = "2.5.16"
 val akkaHttpVersion  = "10.1.5"
 val scalaTestVersion = "3.0.5"
-lazy val Lol = (project in file("."))
-  .aggregate(core, registration, market, web)
+lazy val lol = (project in file("."))
+  .aggregate(core, market, web)
 
 lazy val core = (project in file("core")).
   settings(
@@ -36,19 +35,11 @@ lazy val core = (project in file("core")).
       "org.json4s"          %% "json4s-jackson"       % "3.5.0",
       "org.json4s"          %% "json4s-native"        % "3.5.0",
       "org.scalatest"       %% "scalatest"            % "3.0.3",
-      "de.heikoseeberger"   %% "akka-http-json4s"     % "1.11.0"
+      "de.heikoseeberger"   %% "akka-http-json4s"     % "1.11.0",
       "com.typesafe.akka"   %% "akka-http-spray-json" % "10.1.5",
       "com.typesafe.akka"   %% "akka-stream"          % akkaVersion,
     )
   )
-
-lazy val registration = (project in file("registration")).
-  settings(
-    sharedSettings,
-    libraryDependencies ++= Seq(
-
-    )
-  ).dependsOn(core)
 
 lazy val market = (project in file("market")).
   settings(
@@ -57,7 +48,7 @@ lazy val market = (project in file("market")).
       "com.typesafe.akka" %% "akka-actor"   % akkaVersion,
       "com.typesafe.akka" %% "akka-testkit" % akkaVersion % Test,
     )
-  ).dependsOn(core,registration)
+  ).dependsOn(core)
 
 lazy val web = (project in file("web")).
   settings(
@@ -66,7 +57,7 @@ lazy val web = (project in file("web")).
       "com.typesafe.akka" %% "akka-http"         % "10.1.5",
       "com.typesafe.akka" %% "akka-http-testkit" % "10.1.5" % Test,
     )
-  ).dependsOn(core, registration, market)
+  ).dependsOn(core, market)
 
 
 import sbtdocker._

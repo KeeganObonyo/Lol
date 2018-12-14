@@ -1,5 +1,5 @@
 package com.keeganosala.lol.core
-package auth
+package util.auth
 
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
@@ -13,11 +13,14 @@ import akka.event.Logging
 import com.keeganosala._
 
 import lol.core.config.LolConfig
-import lol.core.db.postgres.service.PostgresDbService
+
+import lol.core.db.postgres.service._
+
+import PostgresDbService._
 
 object AuthenticationService {
 
-  case object AuthenticateUserServiceRequest(
+  case class AuthenticateUserServiceRequest(
     email:String,
     password:String
   )
@@ -30,7 +33,7 @@ class AuthenticationService extends Actor
 
   implicit val actorSystem       = context.system
 
-  implicit val timeout           = Timeout(ElmerConfig.queryTimeout)
+  implicit val timeout           = Timeout(LolConfig.queryTimeout)
 
   def createPostgresDbService    = context.actorOf(Props[PostgresDbService])
 
@@ -51,7 +54,7 @@ class AuthenticationService extends Actor
       userInstance onComplete { response =>
         response match { 
           case Success(response) =>
-          currentSender ! returnToken(response)
+          currentSender ! retrieveToken(response)
           case Failure(error) =>
           log.error("Exception: {}", error)
           currentSender ! Nil

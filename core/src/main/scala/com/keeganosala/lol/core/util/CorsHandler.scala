@@ -9,7 +9,7 @@ import akka.http.scaladsl.server.{ Directive0, Route }
 
 import com.typesafe.config.ConfigFactory
 
-trait CORSHandler{
+trait CorsHandler {
   private val corsResponseHeaders = List(
     `Access-Control-Allow-Origin`.*,
     `Access-Control-Allow-Credentials`(true),

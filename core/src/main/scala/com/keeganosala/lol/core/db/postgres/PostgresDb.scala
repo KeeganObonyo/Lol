@@ -1,11 +1,13 @@
 package com.keeganosala.lol.core
 package db.postgres
 
+import scala.language.postfixOps
+import scala.concurrent.Await
+import scala.concurrent.duration._
+
 import com.github.mauricio.async.db.postgresql.PostgreSQLConnection
 import com.github.mauricio.async.db.Configuration	
 import com.github.mauricio.async.db.Connection
-import scala.concurrent.Await
-import scala.concurrent.duration._
 
 import com.keeganosala._
 
@@ -21,8 +23,12 @@ object PostgresDb {
 	    database = Some(LolConfig.postgresqlDbName)
 	  )
 
-    val connection: Connection = new PostgreSQLConnection(configuration)
+    private val connection: Connection = new PostgreSQLConnection(configuration)
 
     Await.result(connection.connect, 1 seconds)
 
+}
+
+private[postgres] trait PostgresDb {
+  implicit lazy val connection = PostgresDb.connection
 }

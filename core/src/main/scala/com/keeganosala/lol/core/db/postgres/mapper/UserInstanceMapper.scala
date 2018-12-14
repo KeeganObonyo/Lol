@@ -12,7 +12,7 @@ import lol.core.db.postgres.PostgresDb
 
 import lol.core.db.postgres.service.PostgresDbService.UserInstance
 
-private[postgres] object UserInstanceMapper{
+private[postgres] object UserInstanceMapper extends PostgresDb {
 
   private val FetchUserInstanceSql = "SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)"
 
@@ -20,7 +20,7 @@ private[postgres] object UserInstanceMapper{
     email: String,
     password: String
   ) : Future[Option[UserInstance]] = {
-    pool.sendPreparedStatement(
+    connection.sendPreparedStatement(
       FetchUserInstanceSql,
       Array[Any](email, password)
     ).map { queryResult =>

@@ -3,8 +3,9 @@ package computations
 
 import java.util.concurrent.TimeUnit
 
-import scala.concurrent.{ duration._ , Future, Promise }
+import scala.concurrent.duration._ 
 import scala.concurrent.ExecutionContext.Implicits.global
+import scala.concurrent.{ Future, Promise }
 import scala.collection.mutable.ListBuffer
 import scala.math._
 import scala.util.{ Failure, Success }
@@ -15,15 +16,25 @@ import akka.util.Timeout
 
 import com.keeganosala._
 
+import lol.core.config.LolConfig
+
+import lol.market.gateway._
+
 import DataAccessService._
 
 case class AlphavantageData2(
   timedata : Map[String,Map[String,String]]
 )
 
-trait Computations extends AutoMarshalling {
+case class AlphavantageData(
+  `Time Series (1min)`: Map[String,Map[String,String]]
+)
 
-  val dataAccessService = context.actorOf(Props[DataAccessActor], "dataAccessService")
+trait Computations {
+
+  implicit def system: ActorSystem
+
+  val dataAccessService = system.actorOf(Props[DataAccessService], "dataAccessService")
 
   implicit val timedelta = Timeout(5.seconds)
 

@@ -17,15 +17,16 @@ import akka.pattern.ask
 
 import com.keeganosala._
 
+import lol.core.db.postgres.service.PostgresDbService._
+
 import util.CorsHandler
 
-object AuthenticationLogic extends AuthenticationLogic
+import authentikat.jwt._
 
-trait AuthenticationLogic {
+object AuthenticationLogic {
 
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.circe.generic.auto._
-  import authentikat.jwt._
 
   private val tokenExpiryPeriodInDays = 1
   private val header                  = JwtHeader("HS256")
@@ -74,3 +75,18 @@ trait AuthenticationLogic {
 
 }
 
+trait AuthenticationLogic {
+
+  def retrieveToken(user:UserInstance) = AuthenticationLogic.returnToken(user)
+
+  def authenticated: Directive1[Map[String, Any]] =
+    optionalHeaderValueByName("Authorization").flatMap {
+      case Some(jwt) if JsonWebToken.validate(jwt, AuthenticationLogic.secretKey) =>
+        if (AuthenticationLogic.isTokenExpired(jwt)) {
+            complete(StatusCodes.Unauthorized -> "Token expired.")
+        }else{
+            provide(Map("Authorization" -> jwt))
+        }
+      case _ => complete(StatusCodes.Unauthorized)
+    }
+}

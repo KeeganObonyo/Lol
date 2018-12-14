@@ -20,14 +20,13 @@ class ComputationsService extends Actor
 	import context.dispatcher
 
 	def receive: Receive = {
-		val currentSender = sender
 		case GetGraph => 
+			val currentSender = sender
       		log.info("processing " + GetGraph)
-			val graphData = obtainGraphData
-			currentSender ! graphData
+			currentSender ! obtainGraphData
 		case GetVolatility => 
+			val currentSender = sender
       		log.info("processing " + GetVolatility)
-			val volatility = obtainMarketVolatility
-			currentSender ! volatility
+			currentSender ! obtainMarketVolatility
 	}
 }

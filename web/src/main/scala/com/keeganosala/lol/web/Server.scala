@@ -17,7 +17,7 @@ import com.keeganosala._
 
 import lol.core.config.LolConfig
 
-object Server extends App {
+class Server extends App {
 
   private val applicationName = "Lol"
 
@@ -25,23 +25,21 @@ object Server extends App {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  implicit val executionContext = system.dispatcher
-
   lazy val log = Logging(actorSystem, classOf[Server])
 
   val bindingFuture = Http().bindAndHandle(
                   new WebService {
                     override def actorRefFactory = actorSystem
                   }.route,
-                  LolConfig.webHost, 
-                  LolConfig.webPort
+                  LolConfig.apiInterface, 
+                  LolConfig.apiPort
                 )
   log.info(s"Server online at http://localhost:8080\nPress Enter to stop...")
 
   StdIn.readLine()
   bindingFuture
       .flatMap(_.unbind())
-      .onComplete(_ => system.terminate())
+      .onComplete(_ => actorSystem.terminate())
 
-  Await.result(system.whenTerminated, Duration.Inf)
+  Await.result(actorSystem.whenTerminated, Duration.Inf)
 }

@@ -13,15 +13,15 @@ import akka.event.Logging
 import com.keeganosala._
 
 import lol.core.config.LolConfig
-import lol.core.db.mysql.service.PostgresDbService
+import lol.core.db.postgres.service.PostgresDbService
 import lol.core.db.postgres.PostgresDbQueryResult
 
 
 object RegisterUserDbService {
 
   case class RegisterUser(
-    name: String,
     email: String,
+    name: String,
     password:String
   )
 }
@@ -38,8 +38,6 @@ class RegisterUserDbService extends Actor
 
   private val postgresDbService  = createPostgresDbService
 
-  val log                        = Logging(actorSystem, classOf[RegisterUserDbService])
-
   import RegisterUserDbService._
   import PostgresDbService._
 
@@ -48,7 +46,11 @@ class RegisterUserDbService extends Actor
     case user:RegisterUser =>
       log.info("processing " + user)
       val currentSender = sender
-      val addOrder      = (postgresDbService ? UserDbEntry(user)
+      val addUser       = (postgresDbService ? UserDbEntry(
+        email    = user.email,
+        name     = user.name,
+        password = user.password
+      )
     ).mapTo[PostgresDbQueryResult]
       addUser onComplete { response =>
         response match { 

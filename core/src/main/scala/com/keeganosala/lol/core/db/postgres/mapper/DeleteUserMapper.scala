@@ -10,10 +10,7 @@ import com.keeganosala._
 
 import lol.core.db.postgres.PostgresDb
 
-import lol.core.query.QueryService.User
-
-
-private[postgres] object AddUser extends PostgresDb {
+private[postgres] object DeleteUser extends PostgresDb {
 
   private val DeleteUserSql = "delete from users where id = ?"
 

@@ -10,7 +10,7 @@ import akka.actor.{ Actor, ActorLogging }
 import akka.pattern.pipe
 import akka.event.Logging
 
-import com.github.mauricio.async.db.postgresql.QueryResult
+import com.github.mauricio.async.db.QueryResult
 
 import com.keeganosala._
 
@@ -20,7 +20,7 @@ import lol.core.db.postgres.PostgresDbQueryResult
 
 import lol.core.util._
 
-object PostgresDbService extends PostgresDbService {
+object PostgresDbService {
 
   case class UserDbEntry(
     name: String,
@@ -46,7 +46,7 @@ object PostgresDbService extends PostgresDbService {
     password:String
   )
 
-  case object UsersFetchServiceRequest
+  case object UsersFetchDbServiceRequest
 }
 
 class PostgresDbService extends Actor
@@ -54,14 +54,11 @@ class PostgresDbService extends Actor
 
   val system = context.system
 
-  log = Logging(system, classOf[PostgresDbService])
-
   import PostgresDbService._
 
   def receive = {
-    case users:UsersFetchDbServiceRequest =>
+    case UsersFetchDbServiceRequest =>
       val currentSender = sender
-      log.info("processing " + users)
       RetrieveUsersMapper.fetchAvailableUsers.mapTo[List[User]] pipeTo currentSender
 
     case user:UserDbEntry =>
@@ -76,8 +73,8 @@ class PostgresDbService extends Actor
     case userinstanceretrieve:UserDbRetrieve=>
       val currentSender = sender
       UserInstanceMapper.getUserInstance(
-                      email    = user.email,
-                      password = user.password
+                      email    = userinstanceretrieve.email,
+                      password = userinstanceretrieve.password
     ).mapTo[UserInstance] pipeTo currentSender
   }
 }

@@ -13,7 +13,10 @@ import akka.event.Logging
 import com.keeganosala._
 
 import lol.core.config.LolConfig
-import lol.core.db.postgres.service.PostgresDbService
+
+import lol.core.db.postgres.service._
+
+import PostgresDbService._
 
 object QueryService {
 
@@ -30,7 +33,7 @@ class QueryService extends Actor
 
   implicit val actorSystem       = context.system
 
-  implicit val timeout           = Timeout(ElmerConfig.queryTimeout)
+  implicit val timeout           = Timeout(LolConfig.queryTimeout)
 
   def createPostgresDbService    = context.actorOf(Props[PostgresDbService])
 
