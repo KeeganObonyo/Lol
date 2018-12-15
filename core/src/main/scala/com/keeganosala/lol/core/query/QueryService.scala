@@ -23,9 +23,24 @@ object QueryService {
   case object UsersFetchQueryServiceRequest
 
   case class UsersFetchQueryServiceResponse(
-    users:List[UserDbRetrieve]
+    users:List[User]
   )
 
+  case class SingleUserFetchQueryServiceRequest(
+    id:String
+  )
+
+  case class SingleUserFetchQueryServiceResponse(
+    id:String,
+    name:String,
+    email:String
+  )
+
+  case class User(
+    id:String,
+    name:String,
+    email:String
+  )
 }
 
 class QueryService extends Actor
@@ -47,11 +62,13 @@ class QueryService extends Actor
       log.info("processing " + UsersFetchQueryServiceRequest)
       val currentSender = sender
       val userlist      = (postgresDbService ? UsersFetchDbServiceRequest
-    ).mapTo[List[UserDbRetrieve]]
+    ).mapTo[List[User]]
       userlist onComplete { response =>
         response match { 
           case Success(response) =>
-          currentSender ! response
+          currentSender ! UsersFetchQueryServiceResponse(
+            users = response
+        )
           case Failure(error) =>
           log.error("Exception: {}", error)
           currentSender ! UsersFetchQueryServiceResponse(
@@ -59,7 +76,24 @@ class QueryService extends Actor
           )
         }
       }
-
+    case getuser:SingleUserFetchQueryServiceRequest =>
+      log.info("processing" + getuser)
+      val currentSender = sender
+      val user          = (postgresDbService ? SingleUserFetchDbServiceRequest
+    ).mapTo[User]
+      user onComplete { response =>
+        response match { 
+          case Success(response) =>
+          currentSender ! SingleUserFetchQueryServiceResponse(
+            id    = response.id,
+            name  = response.name,
+            email = response.email
+        )
+          case Failure(error) =>
+          log.error("Exception: {}", error)
+          currentSender ! None
+        }
+      }
   }
 
 }

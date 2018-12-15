@@ -21,7 +21,7 @@ import QueryService._
 
 import lol.core.writer._
 
-import RegisterUserDbService._
+import WriteToDbService._
 
 import lol.core.util._
 
@@ -45,7 +45,7 @@ trait WebService extends LolJsonProtocol
 
   private val computationsService    = system.actorOf(Props[ComputationsService])
 
-  private val userRegistryService  	 = system.actorOf(Props[RegisterUserDbService])
+  private val writeToDbService  	 = system.actorOf(Props[WriteToDbService])
 
   private val dbQueryService  	     = system.actorOf(Props[QueryService])
 
@@ -111,14 +111,14 @@ trait WebService extends LolJsonProtocol
 	            get {
 	              authenticated { claims => 
 	                val users: Future[UsersFetchQueryServiceResponse] =
-	                  (dbQueryService ? GetUsers).mapTo[UsersFetchQueryServiceResponse]
+	                  (dbQueryService ? UsersFetchQueryServiceRequest).mapTo[UsersFetchQueryServiceResponse]
 	                complete(users)
 	              }
 	            },
 	            post {
 	              entity(as[RegisterUser]) { user =>
 	                val userCreated =
-	                  (userRegistryService ? user)
+	                  (writeToDbService ? user)
 	                  complete((StatusCodes.Created))
 	              }
 	            }
@@ -128,8 +128,9 @@ trait WebService extends LolJsonProtocol
 	          concat(
 	            get {
 	              authenticated { claims => 
-	                val maybeUser: Future[User] =
-	                  (dbQueryService ? GetUser(id)).mapTo[User]
+	                val maybeUser: Future[SingleUserFetchQueryServiceResponse] =
+	                  (dbQueryService ? SingleUserFetchQueryServiceRequest(id)
+	              ).mapTo[SingleUserFetchQueryServiceResponse]
 	                rejectEmptyResponse {
 	                  complete(maybeUser)
 	                }
@@ -138,7 +139,7 @@ trait WebService extends LolJsonProtocol
 	            delete {
 	              authenticated { claims =>
 	                val userDeleted =
-	                  (userRegistryService ? DeleteUser(id))
+	                  (writeToDbService ? DeleteUser(id))
 	                  complete((StatusCodes.OK))
 	              }
 	            }

@@ -22,7 +22,7 @@ import lol.core.util._
 
 object PostgresDbService {
 
-  case class UserDbEntry(
+  case class UserDbEntryServiceRequest(
     name: String,
     email: String,
     password:String
@@ -34,19 +34,28 @@ object PostgresDbService {
     email: String
   )
 
-  case class UserDbRetrieve(
+  case class UserDbRetrieveServiceRequest(
     email: String,
     password: String
   )
 
-  case class UserInstance(
+  case class UserDbRetrieveServiceResponse(
     id:Int,
     name: String,
     email: String,
     password:String
   )
 
+  case class SingleUserFetchDbServiceRequest(
+    id:String
+  )
+
+  case class UserDeleteDbServiceRequest(
+    id:String
+  )
+
   case object UsersFetchDbServiceRequest
+
 }
 
 class PostgresDbService extends Actor
@@ -61,7 +70,7 @@ class PostgresDbService extends Actor
       val currentSender = sender
       RetrieveUsersMapper.fetchAvailableUsers.mapTo[List[User]] pipeTo currentSender
 
-    case user:UserDbEntry =>
+    case user:UserDbEntryServiceRequest =>
       val currentSender = sender
       log.info("processing " + user)
       AddUserMapper.addUser(
@@ -70,11 +79,25 @@ class PostgresDbService extends Actor
                       password = user.password
     ).mapTo[QueryResult] map { x => currentSender ! PostgresDbQueryResult(x)}
 
-    case userinstanceretrieve:UserDbRetrieve=>
+    case deleteuser:UserDeleteDbServiceRequest =>
+      val currentSender = sender
+      log.info("processing " + deleteuser)
+      DeleteUserMapper.deleteUser(
+                      id     = deleteuser.id
+    ).mapTo[QueryResult] map { x => currentSender ! PostgresDbQueryResult(x)}
+
+    case userinstanceretrieve:UserDbRetrieveServiceRequest =>
       val currentSender = sender
       UserInstanceMapper.getUserInstance(
                       email    = userinstanceretrieve.email,
                       password = userinstanceretrieve.password
-    ).mapTo[UserInstance] pipeTo currentSender
+    ).mapTo[UserDbRetrieveServiceResponse] pipeTo currentSender
+
+    case userfetch:SingleUserFetchDbServiceRequest =>
+      val currentSender = sender
+      SingleUserMapper.getSingleUser(
+                      id    = userfetch.id
+    ).mapTo[User] pipeTo currentSender
+
   }
 }

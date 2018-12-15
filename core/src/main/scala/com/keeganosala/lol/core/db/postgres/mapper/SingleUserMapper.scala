@@ -10,19 +10,18 @@ import com.keeganosala._
 
 import lol.core.db.postgres.PostgresDb
 
-import lol.core.db.postgres.service.PostgresDbService.UserDbRetrieveServiceResponse
+import lol.core.db.postgres.service.PostgresDbService.User
 
-private[postgres] object UserInstanceMapper extends PostgresDb {
+private[postgres] object SingleUserMapper extends PostgresDb {
 
-  private val FetchUserInstanceSql = "SELECT id, name, email, password FROM users WHERE email = ? AND password = crypt(?, password)"
+  private val FetchSingleUser = "SELECT id, name, email FROM users WHERE id = ?"
 
-  def getUserInstance(
-    email: String,
-    password: String
-  ) : Future[Option[UserDbRetrieveServiceResponse]] = {
+  def getSingleUser(
+    id: String
+  ) : Future[Option[User]] = {
     connection.sendPreparedStatement(
-      FetchUserInstanceSql,
-      Array[Any](email, password)
+      FetchSingleUser,
+      Array[Any](id)
     ).map { queryResult =>
       queryResult.rows match {
         case Some(rows) => {
@@ -34,10 +33,10 @@ private[postgres] object UserInstanceMapper extends PostgresDb {
     }
   }
 
-  private def rowToModel(row: RowData) = UserDbRetrieveServiceResponse (
+  private def rowToModel(row: RowData) = User (
     id       = row("id").asInstanceOf[Int],
     name     = row("name").asInstanceOf[String],
-    email    = row("email").asInstanceOf[String],
-    password = row("password").asInstanceOf[String]
+    email    = row("email").asInstanceOf[String]
   )
+
 }

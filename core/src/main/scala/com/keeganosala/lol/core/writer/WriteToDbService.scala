@@ -17,16 +17,20 @@ import lol.core.db.postgres.service.PostgresDbService
 import lol.core.db.postgres.PostgresDbQueryResult
 
 
-object RegisterUserDbService {
+object WriteToDbService {
 
   case class RegisterUser(
     email: String,
     name: String,
     password:String
   )
+
+  case class DeleteUser(
+    id:String
+  )
 }
 
-class RegisterUserDbService extends Actor
+class WriteToDbService extends Actor
     with ActorLogging{
 
 
@@ -38,7 +42,7 @@ class RegisterUserDbService extends Actor
 
   private val postgresDbService  = createPostgresDbService
 
-  import RegisterUserDbService._
+  import WriteToDbService._
   import PostgresDbService._
 
   def receive = {
@@ -46,7 +50,7 @@ class RegisterUserDbService extends Actor
     case user:RegisterUser =>
       log.info("processing " + user)
       val currentSender = sender
-      val addUser       = (postgresDbService ? UserDbEntry(
+      val addUser       = (postgresDbService ? UserDbEntryServiceRequest(
         email    = user.email,
         name     = user.name,
         password = user.password
@@ -61,6 +65,21 @@ class RegisterUserDbService extends Actor
         }
       }
 
+    case deleteuser:DeleteUser =>
+      log.info("processing " + deleteuser)
+      val currentSender = sender
+      val addUser       = (postgresDbService ? UserDeleteDbServiceRequest(
+        id    = deleteuser.id
+      )
+    ).mapTo[PostgresDbQueryResult]
+      addUser onComplete { response =>
+        response match { 
+          case Success(response) =>
+          currentSender ! response
+          case Failure(error) =>
+          log.error("Exception: {}", error)
+        }
+      }
   }
 
 }

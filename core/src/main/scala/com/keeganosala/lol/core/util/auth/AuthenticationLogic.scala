@@ -32,7 +32,7 @@ object AuthenticationLogic {
   private val header                  = JwtHeader("HS256")
   private val secretKey               = "sgdhfjghjk[p';hgubiugh67@@#&*()$"
 
-  private def returnToken(user:UserInstance): String ={
+  private def returnToken(user:UserDbRetrieveServiceResponse): String ={
     val claims = setClaims(user, tokenExpiryPeriodInDays)
     JsonWebToken(header, claims, secretKey)
   }
@@ -48,7 +48,7 @@ object AuthenticationLogic {
       case _ => complete(StatusCodes.Unauthorized)
     }
 
-  private def setClaims(user: UserInstance, expiryPeriodInDays: Long) = JwtClaimsSet(
+  private def setClaims(user: UserDbRetrieveServiceResponse, expiryPeriodInDays: Long) = JwtClaimsSet(
     Map("user" -> user,
         "expiredAt" -> (System.currentTimeMillis() + TimeUnit.DAYS
           .toMillis(expiryPeriodInDays)))
@@ -77,7 +77,7 @@ object AuthenticationLogic {
 
 trait AuthenticationLogic {
 
-  def retrieveToken(user:UserInstance) = AuthenticationLogic.returnToken(user)
+  def retrieveToken(user:UserDbRetrieveServiceResponse) = AuthenticationLogic.returnToken(user)
 
   def authenticated: Directive1[Map[String, Any]] =
     optionalHeaderValueByName("Authorization").flatMap {

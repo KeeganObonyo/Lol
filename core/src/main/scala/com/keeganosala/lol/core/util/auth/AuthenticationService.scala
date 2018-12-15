@@ -46,10 +46,10 @@ class AuthenticationService extends Actor
     case authenticate:AuthenticateUserServiceRequest =>
       log.info("processing " + authenticate)
       val currentSender = sender
-      val userInstance = (postgresDbService ? UserDbRetrieve(
+      val userInstance = (postgresDbService ? UserDbRetrieveServiceRequest(
                           email    = authenticate.email,
                           password = authenticate.password
-    )).mapTo[UserInstance]
+    )).mapTo[UserDbRetrieveServiceResponse]
 
       userInstance onComplete { response =>
         response match { 

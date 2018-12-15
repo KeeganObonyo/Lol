@@ -3,6 +3,7 @@ package web
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.StdIn
 
 import akka.actor.{ ActorRef, ActorSystem, Props }
@@ -17,7 +18,7 @@ import com.keeganosala._
 
 import lol.core.config.LolConfig
 
-class Server extends App {
+object Server extends App {
 
   private val applicationName = "Lol"
 
@@ -25,16 +26,14 @@ class Server extends App {
 
   implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  lazy val log = Logging(actorSystem, classOf[Server])
-
   val bindingFuture = Http().bindAndHandle(
                   new WebService {
-                    override def actorRefFactory = actorSystem
+                    override def system = actorSystem
                   }.route,
                   LolConfig.apiInterface, 
                   LolConfig.apiPort
                 )
-  log.info(s"Server online at http://localhost:8080\nPress Enter to stop...")
+  println(s"Server online at http://localhost:8080\nPress Enter to stop...")
 
   StdIn.readLine()
   bindingFuture

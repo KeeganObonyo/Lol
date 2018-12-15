@@ -76,6 +76,6 @@ dockerImageCreationTask := docker.value
 
 dockerImageCreationTask := (publishLocal in Docker).value
 
-mainClass in Compile := Some("com.keeganosala.lol.web.Server")
+mainClass in (Compile, run) := Some("com.keeganosala.lol.web.Server")
 
 cancelable in Global := true
