@@ -6,12 +6,8 @@ import scala.concurrent.duration.Duration
 import scala.concurrent.ExecutionContext.Implicits.global
 import scala.io.StdIn
 
-import akka.actor.{ ActorRef, ActorSystem, Props }
-import akka.event.Logging
+import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.model.StatusCodes
 import akka.stream.ActorMaterializer
 
 import com.keeganosala._
