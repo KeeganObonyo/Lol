@@ -36,4 +36,8 @@ private[config] trait LolConfig {
   val postgresqlDbPass  = config.getString("lol.db.postgresql.pass")
   val postgresqlDbName  = config.getString("lol.db.postgresql.name")
 
+  val sqlDbPoolMaxObjects   = config.getInt("lol.db.sql.pool.max-objects")
+  val sqlDbPoolMaxIdle      = config.getInt("lol.db.sql.pool.max-idle")
+  val sqlDbPoolMaxQueueSize = config.getInt("lol.db.sql.pool.max-queue-size")
+
 }

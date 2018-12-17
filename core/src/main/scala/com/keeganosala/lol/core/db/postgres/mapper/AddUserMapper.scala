@@ -18,5 +18,5 @@ private[postgres] object AddUserMapper extends PostgresDb {
   	name:String,
   	email:String,
   	password:String
-  	) = connection.sendPreparedStatement(AddUserSql, Array[Any](email, email, password))
+  	) = pool.sendPreparedStatement(AddUserSql, Array[Any](email, email, password))
 }

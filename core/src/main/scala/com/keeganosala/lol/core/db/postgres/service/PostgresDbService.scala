@@ -77,7 +77,8 @@ class PostgresDbService extends Actor
                       name     = user.name,
                       email    = user.email,
                       password = user.password
-    ).mapTo[QueryResult] map { x => currentSender ! PostgresDbQueryResult(x)}
+    )
+      .mapTo[QueryResult] map { x => currentSender ! PostgresDbQueryResult(x)}
 
     case deleteuser:UserDeleteDbServiceRequest =>
       val currentSender = sender

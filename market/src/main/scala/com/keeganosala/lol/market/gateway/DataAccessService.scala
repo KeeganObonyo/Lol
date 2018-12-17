@@ -20,6 +20,10 @@ import marshalling.AlphavantageMarshalling
 object DataAccessService {
 
 	case object GetData
+
+	case class AlphavantageDataDataAccessResponse(
+    `Time Series (1min)`: Map[String,Map[String,String]]
+  )
 }
 
 class DataAccessService extends Actor 
@@ -43,8 +47,13 @@ class DataAccessService extends Actor
 		    responseFuture onComplete {
 		    	case Success(response)=>
 		    		log.info("Successfully retrieved data from alphavantage")
-		      		val alphavantageData = Unmarshal(response.entity).to[AlphavantageData]
-					currentSender ! alphavantageData
+		      		val alphavantageDataDataAccessResponse = Unmarshal(response.entity).to[AlphavantageDataDataAccessResponse]
+		      		alphavantageDataDataAccessResponse onComplete{
+		      			case Success(data)=>
+							currentSender ! data
+						case Failure(error)=>
+							currentSender ! Nil
+		      		}
 				case Failure(error)=>
 		    		log.info("Failure retrieving data from alphavantage")
 					currentSender ! Nil

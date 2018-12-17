@@ -19,7 +19,7 @@ private[postgres] object SingleUserMapper extends PostgresDb {
   def getSingleUser(
     id: String
   ) : Future[Option[User]] = {
-    connection.sendPreparedStatement(
+    pool.sendPreparedStatement(
       FetchSingleUser,
       Array[Any](id)
     ).map { queryResult =>

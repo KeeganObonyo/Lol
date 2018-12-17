@@ -1,11 +1,11 @@
 package com.keeganosala.lol.market
 package gateway.marshalling
 
-import com.keeganosala.lol.core.util.LolJsonProtocol
+import de.heikoseeberger.akkahttpjson4s._
+import org.json4s.{DefaultFormats, jackson }
 
-private[gateway] trait AlphavantageMarshalling extends LolJsonProtocol {
+private[gateway] trait AlphavantageMarshalling extends Json4sSupport {
 
-  case class AlphavantageData(
-    `Time Series (1min)`: Map[String,Map[String,String]]
-  )
+	implicit val serialization = jackson.Serialization
+	implicit val formats = DefaultFormats
 }

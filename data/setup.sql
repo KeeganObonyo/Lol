@@ -1,6 +1,12 @@
+drop extension if exists pgcrypto;
+
 create extension pgcrypto;
 
-drop table users;
+drop database if exists lol_database;
+
+create database lol_database;
+
+drop table if exists users;
 
 create table users (
   id         serial primary key,

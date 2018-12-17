@@ -5,9 +5,10 @@ import scala.language.postfixOps
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-import com.github.mauricio.async.db.postgresql.PostgreSQLConnection
 import com.github.mauricio.async.db.Configuration	
-import com.github.mauricio.async.db.Connection
+import com.github.mauricio.async.db.postgresql.pool.PostgreSQLConnectionFactory
+import com.github.mauricio.async.db.pool.{ ConnectionPool, PoolConfiguration }
+import com.github.mauricio.async.db.postgresql.PostgreSQLConnection
 
 import com.keeganosala._
 
@@ -23,12 +24,17 @@ object PostgresDb {
 	    database = Some(LolConfig.postgresqlDbName)
 	  )
 
-    private val connection: Connection = new PostgreSQLConnection(configuration)
+	private val poolConfiguration = new PoolConfiguration(
+		maxObjects   = LolConfig.sqlDbPoolMaxObjects,
+		maxIdle      = LolConfig.sqlDbPoolMaxIdle,
+		maxQueueSize = LolConfig.sqlDbPoolMaxQueueSize
+	)
 
-    Await.result(connection.connect, 1 seconds)
+	private val factory = new PostgreSQLConnectionFactory(configuration)
 
+    private val pool = new ConnectionPool(factory, poolConfiguration)
 }
 
 private[postgres] trait PostgresDb {
-  implicit lazy val connection = PostgresDb.connection
+  implicit lazy val pool = PostgresDb.pool
 }
