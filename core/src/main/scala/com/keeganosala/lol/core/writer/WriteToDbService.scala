@@ -48,7 +48,7 @@ class WriteToDbService extends Actor
   def receive = {
 
     case user:RegisterUser =>
-      log.info("processing " + user)
+      log.info("processing " + RegisterUser)
       val currentSender = sender
       val addUser       = (postgresDbService ? UserDbEntryServiceRequest(
         email    = user.email,

@@ -17,7 +17,7 @@ private[postgres] object RetrieveUsersMapper extends PostgresDb {
   private val FetchUsersSql = "SELECT id, name, email  FROM users"
 
   def fetchAvailableUsers: Future[List[User]] = {
-    pool.sendPreparedStatement(FetchUsersSql).map { queryResult =>
+    connection.sendPreparedStatement(FetchUsersSql).map { queryResult =>
       queryResult.rows match {
         case Some(rows) => rows.toList map (x => rowToModel(x))
         case None       => Nil

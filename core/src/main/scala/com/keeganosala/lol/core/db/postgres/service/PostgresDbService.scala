@@ -89,16 +89,16 @@ class PostgresDbService extends Actor
 
     case userinstanceretrieve:UserDbRetrieveServiceRequest =>
       val currentSender = sender
-      UserInstanceMapper.getUserInstance(
+      val userInstance = UserInstanceMapper.getUserInstance(
                       email    = userinstanceretrieve.email,
                       password = userinstanceretrieve.password
-    ).mapTo[UserDbRetrieveServiceResponse] pipeTo currentSender
+    ).mapTo[Option[UserDbRetrieveServiceResponse]] pipeTo currentSender
 
     case userfetch:SingleUserFetchDbServiceRequest =>
       val currentSender = sender
       SingleUserMapper.getSingleUser(
                       id    = userfetch.id
-    ).mapTo[User] pipeTo currentSender
+    ).mapTo[Option[User]] pipeTo currentSender
 
   }
 }

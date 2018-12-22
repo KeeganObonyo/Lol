@@ -20,7 +20,7 @@ private[postgres] object UserInstanceMapper extends PostgresDb {
     email: String,
     password: String
   ) : Future[Option[UserDbRetrieveServiceResponse]] = {
-    pool.sendPreparedStatement(
+    connection.sendPreparedStatement(
       FetchUserInstanceSql,
       Array[Any](email, password)
     ).map { queryResult =>

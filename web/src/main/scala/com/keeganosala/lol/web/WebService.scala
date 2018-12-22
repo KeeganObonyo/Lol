@@ -1,5 +1,6 @@
 package com.keeganosala.lol.web
 
+import scala.concurrent.ExecutionContext.Implicits.global
 import scala.concurrent.Future
 import scala.util.{ Failure, Success }
 
@@ -53,15 +54,17 @@ trait WebService extends LolJsonProtocol
 
   implicit val timeout             	 = Timeout(LolConfig.httpRequestTimeout)
 
-  lazy val route = pathPrefix("lol"){ 
-  	corsHandler (concat(
-  		path("data/get"){
+  lazy val route = 
+  	corsHandler (
+  	pathPrefix("lol"){ 
+  		concat(
+  		path("data" / "get"){
 	  		get {
-		  		authenticated{claims=>
+		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsService ? GetGraph))  { 
+			  	onComplete((computationsService ? GetGraph).mapTo[Map[String,Map[String,String]]]) { 
 			  		case Success(data) => 
-			  			complete(data.asInstanceOf[Map[String,Map[String,String]]])
+			  			complete(data)
 			  		case Failure(e) => 
 			  			complete(StatusCodes.BadRequest)
 						}
@@ -69,18 +72,17 @@ trait WebService extends LolJsonProtocol
 				}
 			}
   		},
-  		path("data/compute"){
+  		path("data" / "compute"){
 	  		get {
-		  		authenticated{claims=>
+		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsService ? GetVolatility))  { 
+			  	onComplete((computationsService ? GetVolatility).mapTo[Map[String,String]]) { 
 			  		case Success(data) => 
-			  			complete(data.asInstanceOf[Map[String,String]])
+			  			complete(data)
 			  		case Failure(e) => 
 			  			complete(StatusCodes.BadRequest)
 						}
 					}
-
 				}
 			}
   		},
@@ -90,7 +92,7 @@ trait WebService extends LolJsonProtocol
 				  loginreq =>
 				  onComplete((authenticationService ? loginreq).mapTo[String]) {
 				    case Success(token) => 
-				    respondWithHeader(RawHeader("Access-Token", token)) {
+				    respondWithHeader(RawHeader("Authorization", token)) {
 				      complete(new Token(token = token))
 				    }
 				    case Failure(exception) => 
@@ -110,16 +112,25 @@ trait WebService extends LolJsonProtocol
 	          concat(
 	            get {
 	              authenticated { claims => 
-	                val users: Future[UsersFetchQueryServiceResponse] =
-	                  (dbQueryService ? UsersFetchQueryServiceRequest).mapTo[UsersFetchQueryServiceResponse]
-	                complete(users)
-	              }
+	                onComplete((dbQueryService ? UsersFetchQueryServiceRequest).mapTo[UsersFetchQueryServiceResponse])
+	                 {
+	                	case Success(users)=>
+	                  		complete(users)
+	                  	case Failure(error)=>
+	                  		println(error.toString)
+	                  		complete(StatusCodes.BadRequest)
+	                	}
+	              	}
 	            },
 	            post {
 	              entity(as[RegisterUser]) { user =>
-	                val userCreated =
-	                  (writeToDbService ? user)
-	                  complete((StatusCodes.Created))
+	                onComplete((writeToDbService ? user)) {
+	                	case Success(done)=>
+	                  		complete(StatusCodes.Created)
+	                  	case Failure(error)=>
+	                  		println(error.toString)
+	                  		complete(StatusCodes.BadRequest)
+	                }
 	              }
 	            }
 	          )
@@ -128,12 +139,13 @@ trait WebService extends LolJsonProtocol
 	          concat(
 	            get {
 	              authenticated { claims => 
-	                val maybeUser: Future[SingleUserFetchQueryServiceResponse] =
-	                  (dbQueryService ? SingleUserFetchQueryServiceRequest(id)
-	              ).mapTo[SingleUserFetchQueryServiceResponse]
-	                rejectEmptyResponse {
-	                  complete(maybeUser)
-	                }
+	              onComplete((dbQueryService ? SingleUserFetchQueryServiceRequest(id)
+	          ).mapTo[Option[SingleUserFetchQueryServiceResponse]]) {
+				    case Success(user) => 
+	                  complete(user.get)
+				    case Failure(error) => 
+				      complete(StatusCodes.NotFound)
+				  }
 	              }
 	            },
 	            delete {
@@ -146,6 +158,6 @@ trait WebService extends LolJsonProtocol
 	          )
 	        }
 	      )
-  		}))
-  	}
+  		})
+  	})
 }
