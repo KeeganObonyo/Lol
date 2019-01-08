@@ -47,11 +47,11 @@ object PostgresDbService {
   )
 
   case class SingleUserFetchDbServiceRequest(
-    id:String
+    id:Int
   )
 
   case class UserDeleteDbServiceRequest(
-    id:String
+    id:Int
   )
 
   case object UsersFetchDbServiceRequest

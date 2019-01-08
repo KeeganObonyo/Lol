@@ -26,7 +26,7 @@ object WriteToDbService {
   )
 
   case class DeleteUser(
-    id:String
+    id:Int
   )
 }
 
@@ -66,7 +66,7 @@ class WriteToDbService extends Actor
       }
 
     case deleteuser:DeleteUser =>
-      log.info("processing " + deleteuser)
+      log.info("processing " + DeleteUser)
       val currentSender = sender
       val addUser       = (postgresDbService ? UserDeleteDbServiceRequest(
         id    = deleteuser.id

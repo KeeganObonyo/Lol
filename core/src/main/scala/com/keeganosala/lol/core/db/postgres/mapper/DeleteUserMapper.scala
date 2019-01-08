@@ -14,7 +14,7 @@ private[postgres] object DeleteUserMapper extends PostgresDb {
 
   private val DeleteUserSql = "delete from users where id = ?"
 
-  def deleteUser(id:String) = {
+  def deleteUser(id:Int) = {
     connection.sendPreparedStatement(DeleteUserSql, Array[Any](id))
     }
 }

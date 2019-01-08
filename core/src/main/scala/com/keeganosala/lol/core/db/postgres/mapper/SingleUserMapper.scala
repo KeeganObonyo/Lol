@@ -17,7 +17,7 @@ private[postgres] object SingleUserMapper extends PostgresDb {
   private val FetchSingleUser = "SELECT id, name, email FROM users WHERE id = ?"
 
   def getSingleUser(
-    id: String
+    id: Int
   ) : Future[Option[User]] = {
     connection.sendPreparedStatement(
       FetchSingleUser,

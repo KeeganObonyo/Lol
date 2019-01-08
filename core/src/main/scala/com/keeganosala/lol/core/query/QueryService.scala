@@ -27,7 +27,7 @@ object QueryService {
   )
 
   case class SingleUserFetchQueryServiceRequest(
-    id:String
+    id:Int
   )
 
   case class SingleUserFetchQueryServiceResponse(
@@ -77,9 +77,9 @@ class QueryService extends Actor
         }
       }
     case getuser:SingleUserFetchQueryServiceRequest =>
-      log.info("processing" + getuser)
+      log.info("processing" + SingleUserFetchDbServiceRequest)
       val currentSender = sender
-      val user          = (postgresDbService ? SingleUserFetchDbServiceRequest
+      val user          = (postgresDbService ? getuser
     ).mapTo[User]
       user onComplete { response =>
         response match { 
