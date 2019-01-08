@@ -135,17 +135,17 @@ trait WebService extends LolJsonProtocol
 	            }
 	          )
 	        },
-	        path(Segment) { id =>
+	        path(IntNumber) { id =>
 	          concat(
 	            get {
 	              authenticated { claims => 
 	              onComplete((dbQueryService ? SingleUserFetchQueryServiceRequest(id)
-	          ).mapTo[Option[SingleUserFetchQueryServiceResponse]]) {
+	                ).mapTo[Option[SingleUserFetchQueryServiceResponse]]) {
 				    case Success(user) => 
 	                  complete(user.get)
 				    case Failure(error) => 
 				      complete(StatusCodes.NotFound)
-				  }
+				  	}
 	              }
 	            },
 	            delete {
@@ -153,11 +153,9 @@ trait WebService extends LolJsonProtocol
 	                val userDeleted =
 	                  (writeToDbService ? DeleteUser(id))
 	                  complete((StatusCodes.OK))
-	              }
-	            }
-	          )
-	        }
-	      )
+	              	}
+	            })
+	        })
   		})
   	})
 }
