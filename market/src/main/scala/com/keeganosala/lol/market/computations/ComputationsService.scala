@@ -14,11 +14,21 @@ import lol.core.config.LolConfig
 
 import lol.market.gateway._
 
-import DataAccessService._
+import AlphavantageGateway._
 
 object ComputationsService {
-	case object GetGraph
-	case object GetVolatility
+	case object ComputationsServiceGraphRequest
+
+	case object ComputationsServiceVolatilityRequest
+
+	case class ComputationsServiceGraphResponse(
+    	data : Map[String,Map[String,String]]
+	)
+
+	case class ComputationsServiceVolatilityResponse(
+		data : Map[String,Double]
+	)
+
 }
 
 class ComputationsService extends Actor
@@ -29,33 +39,39 @@ class ComputationsService extends Actor
 
   	implicit val materializer: ActorMaterializer = ActorMaterializer()
 
-  	val dataAccessService 	= system.actorOf(Props[DataAccessService], "dataAccessService")
+  	def createAlphavantageGateway 		= system.actorOf(Props[AlphavantageGateway])
 
-  	implicit val timeout    = Timeout(LolConfig.httpRequestTimeout)
+  	private val alphavantageGateway 	= createAlphavantageGateway
+
+  	implicit val timeout    			= Timeout(LolConfig.httpRequestTimeout)
   	
 	import ComputationsService._ 
 	import context.dispatcher
 
 	def receive: Receive = {
-		case GetGraph => 
+		case ComputationsServiceGraphRequest => 
 			val currentSender = sender
-      		log.info("processing " + GetGraph)
-      		val obtainData = (dataAccessService ? GetData).mapTo[AlphavantageDataDataAccessResponse] 
+      		log.info("processing " + ComputationsServiceGraphRequest)
+      		val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest).mapTo[AlphavantageDataGatewayResponse] 
       		obtainData onComplete {
 		  		case Success(data) => 
-		  			currentSender ! data.`Time Series (1min)`
+		  			currentSender ! ComputationsServiceGraphResponse(
+		  				data = data.`Time Series (1min)`
+		  			)
 		  		case Failure(e) => 
       				log.info("Error obtaining data service")
 		  			currentSender ! Nil
 			}
-		case GetVolatility => 
+		case ComputationsServiceVolatilityRequest => 
 			val currentSender = sender
-      		log.info("processing " + GetVolatility)
-	      	val obtainData = (dataAccessService ? GetData).mapTo[AlphavantageDataDataAccessResponse] 
+      		log.info("processing " + ComputationsServiceVolatilityRequest)
+	      	val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest).mapTo[AlphavantageDataGatewayResponse] 
 	      	obtainData onComplete {
 		  		case Success(data) => 
 		  			val volatility = calculateVolatility(new AlphavantageData(timedata = data `Time Series (1min)`))
-					currentSender ! volatility
+					currentSender ! ComputationsServiceVolatilityResponse(
+						data = volatility
+					)
 		  		case Failure(e) => 
 	      			log.info("Error obtaining data from service")
 					currentSender ! Nil

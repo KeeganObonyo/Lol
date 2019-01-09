@@ -17,16 +17,16 @@ import lol.core.config.LolConfig
 
 import marshalling.AlphavantageMarshalling
 
-object DataAccessService {
+object AlphavantageGateway {
 
-	case object GetData
+	case object AlphavantageDataGatewayRequest
 
-	case class AlphavantageDataDataAccessResponse(
+	case class AlphavantageDataGatewayResponse(
     `Time Series (1min)`: Map[String,Map[String,String]]
   )
 }
 
-class DataAccessService extends Actor 
+class AlphavantageGateway extends Actor 
 	with ActorLogging 
 	with AlphavantageMarshalling {
 
@@ -36,18 +36,18 @@ class DataAccessService extends Actor
 
   	val url             	  = LolConfig.brokerUrl
 
-	import DataAccessService._
+	import AlphavantageGateway._
 	import context.dispatcher
 
 	def receive: Receive = {
-		case GetData=>
-			log.info("processing" + GetData)
+		case AlphavantageDataGatewayRequest =>
+			log.info("processing" + AlphavantageDataGatewayRequest)
 			val currentSender = sender
     		val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = url))
 		    responseFuture onComplete {
 		    	case Success(response)=>
 		    		log.info("Successfully retrieved data from alphavantage")
-		      		val alphavantageDataDataAccessResponse = Unmarshal(response.entity).to[AlphavantageDataDataAccessResponse]
+		      		val alphavantageDataDataAccessResponse = Unmarshal(response.entity).to[AlphavantageDataGatewayResponse]
 		      		alphavantageDataDataAccessResponse onComplete{
 		      			case Success(data)=>
 							currentSender ! data
