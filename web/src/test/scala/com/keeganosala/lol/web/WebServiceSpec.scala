@@ -7,6 +7,10 @@ import akka.http.scaladsl.testkit.{ RouteTestTimeout, ScalatestRouteTest }
 import akka.http.scaladsl.server._
 import Directives._
 
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.jackson.JsonMethods._
+
 import spray.json._
 import DefaultJsonProtocol._
 
@@ -30,17 +34,17 @@ class WebServiceSpec extends WordSpec
     with AuthenticationLogic {
 
   lazy val routes               = route
-
-  implicit val routeTestTimeout = RouteTestTimeout(FiniteDuration(20, "seconds"))
   
   val invalidAuthToken          = "ATtkn_InvalidAuthToken"
 
   val validAuthToken            = retrieveToken(UserDbRetrieveServiceResponse(
-      id        =1,
+      id        = 1,
       name      = "TestUSer",
       email     = "test@gmail.com",
-      password  ="dfghjkl;kl;;''"
+      password  = "dfghjkl;kl;;''"
   ))
+
+  implicit val routeTestTimeout = RouteTestTimeout(FiniteDuration(20, "seconds"))
 
   "LolWebService" should {
     "Reject a request if the user sends in an invalid token" in {
@@ -65,32 +69,29 @@ class WebServiceSpec extends WordSpec
     }
     "be able to return a single user" in {
       Get("/lol/users/1") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
-        status shouldEqual StatusCodes.OK
+        status shouldEqual StatusCodes.NotFound
       }
     }
     "be able to add a new user" in {
-      val user = JsObject(
-        "email"    -> "user@gmail.com".toJson,
-        "name"     -> "user1".toJson,
-        "password" -> "password".toJson
-      )
+
+      val user =
+      parse("""{"email":"user@gmail.com","name":"TestUSer","password":"password"}""").asInstanceOf[JObject]
+
       Post("/lol/users", user) ~> routes ~> check {
         status shouldEqual StatusCodes.Created
       }
     }
     "be able to reject an invalid user registration" in {
-      val user = JsObject(
-        "name"     -> "user1".toJson,
-        "password" -> "password".toJson
-      )
+      val user = 
+      parse("""{"name":"TestUSer","password":"password"}""").asInstanceOf[JObject]
+
       Post("/lol/users", user) ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.BadRequest
       }
     }
     "be able to delete a registered user" in {
-      Put("/food/order/1") ~> Route.seal(route) ~> check {
-        status shouldEqual StatusCodes.MethodNotAllowed
-        responseAs[String] shouldEqual "HTTP method not allowed, supported methods: POST"
+      Delete("/lol/users/1") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
+        status shouldEqual StatusCodes.OK
       }
     }
     "leave requests with invalid paths unhandled" in {

@@ -30,9 +30,9 @@ import lol.core.util.auth._
 
 import AuthenticationService._
 
-import lol.market.computations._
+import lol.market._
 
-import ComputationsService._
+import DataAccessService._
 
 case class Token (
 	token:String
@@ -44,7 +44,7 @@ trait WebService extends LolJsonProtocol
   
   implicit def system: ActorSystem
 
-  private val computationsService    = system.actorOf(Props[ComputationsService])
+  private val dataAccessService      = system.actorOf(Props[DataAccessService])
 
   private val writeToDbService  	 = system.actorOf(Props[WriteToDbService])
 
@@ -62,7 +62,7 @@ trait WebService extends LolJsonProtocol
 	  		get {
 		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsService ? GetGraph).mapTo[Map[String,Map[String,String]]]) { 
+			  	onComplete((dataAccessService ? GraphDataRequest).mapTo[Map[String,Map[String,String]]]) { 
 			  		case Success(data) => 
 			  			complete(data)
 			  		case Failure(e) => 
@@ -76,7 +76,7 @@ trait WebService extends LolJsonProtocol
 	  		get {
 		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((computationsService ? GetVolatility).mapTo[Map[String,String]]) { 
+			  	onComplete((dataAccessService ? VolatilityAnalysisRequest).mapTo[Map[String,String]]) { 
 			  		case Success(data) => 
 			  			complete(data)
 			  		case Failure(e) => 
