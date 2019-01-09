@@ -106,7 +106,7 @@ trait WebService extends LolJsonProtocol
 			    }
 			  })
   		},
-  		path("users"){
+  		pathPrefix ("users"){
 	      concat(
 	        pathEnd {
 	          concat(
@@ -140,9 +140,9 @@ trait WebService extends LolJsonProtocol
 	            get {
 	              authenticated { claims => 
 	              onComplete((dbQueryService ? SingleUserFetchQueryServiceRequest(id)
-	                ).mapTo[Option[SingleUserFetchQueryServiceResponse]]) {
+	                ).mapTo[SingleUserFetchQueryServiceResponse]) {
 				    case Success(user) => 
-	                  complete(user.get)
+	                  complete(user)
 				    case Failure(error) => 
 				      complete(StatusCodes.NotFound)
 				  	}
