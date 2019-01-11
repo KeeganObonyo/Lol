@@ -28,3 +28,4 @@ trait LolTestHttpService extends LolTestService {
   ): HttpResponse
 
 }
+
