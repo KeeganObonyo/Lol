@@ -23,7 +23,12 @@ object AlphavantageGateway {
 
 	case class AlphavantageDataGatewayResponse(
     `Time Series (1min)`: Map[String,Map[String,String]]
-  )
+  	)
+
+  	case class AlphavantageDataGatewayErrorResponse(
+  		description:String
+  	)
+
 }
 
 class AlphavantageGateway extends Actor 
@@ -39,24 +44,35 @@ class AlphavantageGateway extends Actor
 	import AlphavantageGateway._
 	import context.dispatcher
 
+	def sendHttpRequest(request:HttpRequest):Future[HttpResponse] = Http().singleRequest(request)
+
 	def receive: Receive = {
 		case AlphavantageDataGatewayRequest =>
 			log.info("processing" + AlphavantageDataGatewayRequest)
-			val currentSender = sender
-    		val responseFuture: Future[HttpResponse] = Http().singleRequest(HttpRequest(uri = url))
+			val currentSender  = sender
+    		val responseFuture = sendHttpRequest(HttpRequest(
+    			method = HttpMethods.GET,
+    			uri    = url))
+    		
 		    responseFuture onComplete {
 		    	case Success(response)=>
 		    		log.info("Successfully retrieved data from alphavantage")
 		      		val alphavantageDataDataAccessResponse = Unmarshal(response.entity).to[AlphavantageDataGatewayResponse]
 		      		alphavantageDataDataAccessResponse onComplete{
 		      			case Success(data)=>
+		    				log.info("Successfully processed data from alphavantage")
 							currentSender ! data
 						case Failure(error)=>
-							currentSender ! Nil
+		    				log.info("Got an error while unmarshalling json data from alphavantage")
+							currentSender ! AlphavantageDataGatewayErrorResponse(
+								description = "Got an error while unmarshalling json data from alphavantage"
+							)
 		      		}
 				case Failure(error)=>
 		    		log.info("Failure retrieving data from alphavantage")
-					currentSender ! Nil
+					currentSender ! AlphavantageDataGatewayErrorResponse(
+						description = "Failure retrieving data from alphavantage"
+					)
 		}
 	}
 }

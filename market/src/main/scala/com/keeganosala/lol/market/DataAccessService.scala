@@ -24,15 +24,15 @@ class DataAccessService extends Actor
 	with ActorLogging 
 	with Computations {
 
-	implicit val system = context.system
+	implicit val system					= context.system
 
-  	implicit val materializer: ActorMaterializer = ActorMaterializer()
+ 	implicit val materializer           = ActorMaterializer()
 
   	def createComputationsService 		= system.actorOf(Props[ComputationsService])
 
   	private val computationsService 	= createComputationsService
 
-  	implicit val timeout    = Timeout(LolConfig.httpRequestTimeout)
+  	implicit val timeout    			= Timeout(LolConfig.httpRequestTimeout)
   	
 	import DataAccessService._ 
 	import context.dispatcher

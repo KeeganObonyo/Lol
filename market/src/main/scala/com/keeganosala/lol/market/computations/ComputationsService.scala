@@ -35,9 +35,7 @@ class ComputationsService extends Actor
 	with ActorLogging 
 	with Computations {
 
-	implicit val system = context.system
-
-  	implicit val materializer: ActorMaterializer = ActorMaterializer()
+	implicit val system 				= context.system
 
   	def createAlphavantageGateway 		= system.actorOf(Props[AlphavantageGateway])
 
