@@ -9,7 +9,6 @@ import scala.language.postfixOps
 
 import akka.actor.Props
 import akka.http.scaladsl.marshalling.Marshal
-import akka.http.scaladsl.unmarshalling.Unmarshal
 
 import akka.http.scaladsl.model._
 import akka.testkit._
@@ -34,7 +33,18 @@ class AlphavantageGatewaySpec extends LolTestHttpService
   "The AlphavantageGateway" must {
   	"process a request and return market data" in {
       alphavantageGateway ! AlphavantageDataGatewayRequest
-      expectMsgType[AlphavantageDataGatewayResponse](FiniteDuration(20, "seconds"))
+      expectMsg(FiniteDuration(20, "seconds"),
+      AlphavantageDataGatewayResponse(
+          Map("2019-01-09 14:41:00" -> Map(
+              "2. high"   -> "104.3000",
+              "3. low"    -> "104.2500",
+              "5. volume" -> "31102",
+              "1. open"   -> "104.3000",
+              "4. close"  -> "104.2800"
+            )
+          )
+        )
+      )
     }
   }
   override def getStringHttpResponseImpl(
@@ -45,7 +55,7 @@ class AlphavantageGatewaySpec extends LolTestHttpService
           Map("Time Series (1min)"-> Map(
                   "2019-01-09 14:41:00" -> Map(
                     "2. high"   -> "104.3000",
-                    "3. low"    ->  "104.2500",
+                    "3. low"    -> "104.2500",
                     "5. volume" -> "31102",
                     "1. open"   -> "104.3000",
                     "4. close"  -> "104.2800"
