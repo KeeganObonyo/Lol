@@ -17,7 +17,15 @@ import ComputationsService._
 
 object DataAccessService {
 	case object GraphDataRequest
+
 	case object VolatilityAnalysisRequest
+
+	case class GraphDataRequestResponse(
+    	data : Map[String,Map[String,String]]
+	)
+	case class VolatilityAnalysisResponse(
+		data : Map[String,Double]
+	)
 }
 
 class DataAccessService extends Actor
@@ -45,7 +53,9 @@ class DataAccessService extends Actor
       	).mapTo[ComputationsServiceGraphResponse] 
       		obtainData onComplete {
 		  		case Success(graphdata) => 
-		  			currentSender ! graphdata.data
+		  			currentSender ! GraphDataRequestResponse(
+		  				data = graphdata.data
+		  			)
 		  		case Failure(e) => 
       				log.info("Error obtaining analysed data from service")
 		  			currentSender ! Nil
@@ -57,7 +67,9 @@ class DataAccessService extends Actor
 	    ).mapTo[ComputationsServiceVolatilityResponse] 
 	      	obtainData onComplete {
 		  		case Success(volatilitydata) => 
-					currentSender ! volatilitydata.data
+		  			currentSender ! VolatilityAnalysisResponse(
+		  				data = volatilitydata.data
+		  			)
 		  		case Failure(e) => 
 	      			log.info("Error obtaining analysed data from service")
 					currentSender ! Nil

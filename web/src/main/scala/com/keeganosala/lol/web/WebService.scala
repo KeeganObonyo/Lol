@@ -62,9 +62,9 @@ trait WebService extends LolJsonProtocol
 	  		get {
 		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((dataAccessService ? GraphDataRequest).mapTo[Map[String,Map[String,String]]]) { 
-			  		case Success(data) => 
-			  			complete(data)
+			  	onComplete((dataAccessService ? GraphDataRequest).mapTo[GraphDataRequestResponse]) { 
+			  		case Success(graphdata) => 
+			  			complete(graphdata.data)
 			  		case Failure(e) => 
 			  			complete(StatusCodes.BadRequest)
 						}
@@ -76,9 +76,9 @@ trait WebService extends LolJsonProtocol
 	  		get {
 		  		authenticated{ claims=>
 			  	rejectEmptyResponse {
-			  	onComplete((dataAccessService ? VolatilityAnalysisRequest).mapTo[Map[String,String]]) { 
-			  		case Success(data) => 
-			  			complete(data)
+			  	onComplete((dataAccessService ? VolatilityAnalysisRequest).mapTo[VolatilityAnalysisResponse]) { 
+			  		case Success(volatilitycalculation) => 
+			  			complete(volatilitycalculation.data)
 			  		case Failure(e) => 
 			  			complete(StatusCodes.BadRequest)
 						}
