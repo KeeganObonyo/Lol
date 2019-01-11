@@ -73,7 +73,6 @@ class WebServiceSpec extends WordSpec
       }
     }
     "be able to add a new user" in {
-
       val user =
       parse("""{"email":"user@gmail.com","name":"TestUSer","password":"password"}""").asInstanceOf[JObject]
 

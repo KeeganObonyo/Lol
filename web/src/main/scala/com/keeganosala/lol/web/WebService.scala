@@ -44,7 +44,7 @@ trait WebService extends LolJsonProtocol
   
   implicit def system: ActorSystem
 
-  private val dataAccessService      = system.actorOf(Props[DataAccessService])
+  val dataAccessService    			 = system.actorOf(Props[DataAccessService])
 
   private val writeToDbService  	 = system.actorOf(Props[WriteToDbService])
 
