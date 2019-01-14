@@ -45,6 +45,20 @@ class WriteToDbServiceSpec extends LolTestService {
 
       postgresDbServiceProbe.expectNoMessage(100 millis)
     }
+    "Delete a user from the database" in {
+      writeToDbService ! DeleteUser(
+          id = 3
+      )
+      postgresDbServiceProbe.expectMsg(UserDeleteDbServiceRequest(
+        id = 3
+      ))
+      postgresDbServiceProbe.reply(PostgresDbQueryResult(
+        rowsAffected = 1))
+      expectMsg(PostgresDbQueryResult(
+        rowsAffected = 1))
+
+      postgresDbServiceProbe.expectNoMessage(100 millis)
+    }
   }
 }
 
