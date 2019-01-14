@@ -27,8 +27,8 @@ class DataAccessServiceSpec extends LolTestService {
 
   "The DataAccessService" must {
     "send a request to the broker and return a GraphDataRequestResponse" in {
-      dataAccessService ! GraphDataRequest
-      computationsServiceProbe.expectMsg(ComputationsServiceGraphRequest)
+      dataAccessService ! GraphDataRequest("MSFT")
+      computationsServiceProbe.expectMsg(ComputationsServiceGraphRequest("MSFT"))
       computationsServiceProbe.reply(
         ComputationsServiceGraphResponse(
           Map("2019-01-09 14:41:00" -> Map(
@@ -55,8 +55,8 @@ class DataAccessServiceSpec extends LolTestService {
       computationsServiceProbe.expectNoMessage(100 millis)
     }
     "send a request to the broker and return a VolatilityAnalysisResponse" in {
-      dataAccessService ! VolatilityAnalysisRequest
-      computationsServiceProbe.expectMsg(ComputationsServiceVolatilityRequest)
+      dataAccessService ! VolatilityAnalysisRequest("MSFT")
+      computationsServiceProbe.expectMsg(ComputationsServiceVolatilityRequest("MSFT"))
       computationsServiceProbe.reply(
         ComputationsServiceVolatilityResponse(
            Map(

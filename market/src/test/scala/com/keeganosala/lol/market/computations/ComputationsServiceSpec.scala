@@ -28,8 +28,8 @@ class ComputationsServiceSpec extends LolTestService {
 
   "The ComputationsService" must {
     "request for data from the broker and return a ComputationsServiceGraphResponse" in {
-      computationsService ! ComputationsServiceGraphRequest
-      alphavantageGatewayServiceProbe.expectMsg(AlphavantageDataGatewayRequest)
+      computationsService ! ComputationsServiceGraphRequest("MSFT")
+      alphavantageGatewayServiceProbe.expectMsg(AlphavantageDataGatewayRequest("MSFT"))
       alphavantageGatewayServiceProbe.reply(
         AlphavantageDataGatewayResponse(
           Map("2019-01-09 14:41:00" -> Map(
@@ -57,8 +57,8 @@ class ComputationsServiceSpec extends LolTestService {
       alphavantageGatewayServiceProbe.expectNoMessage(100 millis)
     }
     "request for data from the broker and return a ComputationsServiceVolatilityResponse" in {
-      computationsService ! ComputationsServiceVolatilityRequest
-      alphavantageGatewayServiceProbe.expectMsg(AlphavantageDataGatewayRequest)
+      computationsService ! ComputationsServiceVolatilityRequest("MSFT")
+      alphavantageGatewayServiceProbe.expectMsg(AlphavantageDataGatewayRequest("MSFT"))
       alphavantageGatewayServiceProbe.reply(
         AlphavantageDataGatewayResponse(
           Map("2019-01-09 14:41:00" -> Map(

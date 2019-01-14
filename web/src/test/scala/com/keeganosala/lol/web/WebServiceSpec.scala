@@ -45,7 +45,7 @@ class WebServiceSpec extends WordSpec
 
   "LolWebService" should {
     "Reject a request if the user sends in an invalid token" in {
-      Get("/lol/data/get") ~> addHeader("Authorization", invalidAuthToken) ~> Route.seal(route) ~> check {
+      Get("/lol/data/get/MSFT") ~> addHeader("Authorization", invalidAuthToken) ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.Unauthorized
       }
     }

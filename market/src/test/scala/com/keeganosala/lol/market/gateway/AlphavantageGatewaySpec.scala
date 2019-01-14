@@ -32,7 +32,7 @@ class AlphavantageGatewaySpec extends LolTestHttpService
   }))
   "The AlphavantageGateway" must {
   	"process a request and return market data" in {
-      alphavantageGateway ! AlphavantageDataGatewayRequest
+      alphavantageGateway ! AlphavantageDataGatewayRequest("MSFT")
       expectMsg(FiniteDuration(20, "seconds"),
       AlphavantageDataGatewayResponse(
           Map("2019-01-09 14:41:00" -> Map(
