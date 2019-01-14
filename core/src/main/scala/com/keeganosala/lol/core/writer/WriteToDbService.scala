@@ -59,6 +59,7 @@ class WriteToDbService extends Actor
       addUser onComplete { response =>
         response match { 
           case Success(response) =>
+            println(response)
           currentSender ! response
           case Failure(error) =>
           log.error("Exception: {}", error)

@@ -38,6 +38,7 @@ lazy val core = (project in file("core")).
       "de.heikoseeberger"   %% "akka-http-json4s"     % "1.11.0",
       "com.typesafe.akka"   %% "akka-http-spray-json" % "10.1.5",
       "com.typesafe.akka"   %% "akka-stream"          % akkaVersion,
+      "com.typesafe.akka"   %% "akka-testkit"         % akkaVersion % Test,
     )
   )
 
