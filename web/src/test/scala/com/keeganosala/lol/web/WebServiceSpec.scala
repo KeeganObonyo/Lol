@@ -50,12 +50,12 @@ class WebServiceSpec extends WordSpec
       }
     }
     "be able to return a slice of market data" in {
-      Get("/lol/data/get") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
+      Get("/lol/data/get/MSFT") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }
     "be able to return analysed market data" in {
-      Get("/lol/data/compute") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
+      Get("/lol/data/compute/MSFT") ~> addHeader("Authorization", validAuthToken) ~> Route.seal(route) ~> check {
         status shouldEqual StatusCodes.OK
       }
     }

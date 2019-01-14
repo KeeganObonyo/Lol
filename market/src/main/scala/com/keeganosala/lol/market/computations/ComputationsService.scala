@@ -17,9 +17,13 @@ import lol.market.gateway._
 import AlphavantageGateway._
 
 object ComputationsService {
-	case object ComputationsServiceGraphRequest
+	case class ComputationsServiceGraphRequest(
+		symbol:String
+	)
 
-	case object ComputationsServiceVolatilityRequest
+	case class ComputationsServiceVolatilityRequest(
+		symbol:String
+	)
 
 	case class ComputationsServiceGraphResponse(
     	data : Map[String,Map[String,String]]
@@ -47,10 +51,10 @@ class ComputationsService extends Actor
 	import context.dispatcher
 
 	def receive: Receive = {
-		case ComputationsServiceGraphRequest => 
+		case request:ComputationsServiceGraphRequest => 
 			val currentSender = sender
       		log.info("processing " + ComputationsServiceGraphRequest)
-      		val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest).mapTo[AlphavantageDataGatewayResponse] 
+      		val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest(request.symbol)).mapTo[AlphavantageDataGatewayResponse] 
       		obtainData onComplete {
 		  		case Success(data) => 
 		  			currentSender ! ComputationsServiceGraphResponse(
@@ -60,10 +64,10 @@ class ComputationsService extends Actor
       				log.info("Error obtaining data service")
 		  			currentSender ! Nil
 			}
-		case ComputationsServiceVolatilityRequest => 
+		case request:ComputationsServiceVolatilityRequest => 
 			val currentSender = sender
       		log.info("processing " + ComputationsServiceVolatilityRequest)
-	      	val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest).mapTo[AlphavantageDataGatewayResponse] 
+	      	val obtainData = (alphavantageGateway ? AlphavantageDataGatewayRequest(request.symbol)).mapTo[AlphavantageDataGatewayResponse] 
 	      	obtainData onComplete {
 		  		case Success(data) => 
 		  			val volatility = calculateVolatility(new AlphavantageData(timedata = data `Time Series (1min)`))

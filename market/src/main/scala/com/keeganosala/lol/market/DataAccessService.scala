@@ -16,9 +16,13 @@ import lol.market.computations._
 import ComputationsService._
 
 object DataAccessService {
-	case object GraphDataRequest
+	case class GraphDataRequest(
+		symbol:String
+	)
 
-	case object VolatilityAnalysisRequest
+	case class VolatilityAnalysisRequest(
+		symbol:String
+	)
 
 	case class GraphDataRequestResponse(
     	data : Map[String,Map[String,String]]
@@ -46,10 +50,10 @@ class DataAccessService extends Actor
 	import context.dispatcher
 
 	def receive: Receive = {
-		case GraphDataRequest => 
+		case request:GraphDataRequest => 
 			val currentSender = sender
       		log.info("processing " + GraphDataRequest)
-      		val obtainData = (computationsService ? ComputationsServiceGraphRequest
+      		val obtainData = (computationsService ? ComputationsServiceGraphRequest(request.symbol)
       	).mapTo[ComputationsServiceGraphResponse] 
       		obtainData onComplete {
 		  		case Success(graphdata) => 
@@ -60,10 +64,10 @@ class DataAccessService extends Actor
       				log.info("Error obtaining analysed data from service")
 		  			currentSender ! Nil
 			}
-		case VolatilityAnalysisRequest => 
+		case request:VolatilityAnalysisRequest => 
 			val currentSender = sender
       		log.info("processing " + VolatilityAnalysisRequest)
-	      	val obtainData = (computationsService ? ComputationsServiceVolatilityRequest
+	      	val obtainData = (computationsService ? ComputationsServiceVolatilityRequest(request.symbol)
 	    ).mapTo[ComputationsServiceVolatilityResponse] 
 	      	obtainData onComplete {
 		  		case Success(volatilitydata) => 

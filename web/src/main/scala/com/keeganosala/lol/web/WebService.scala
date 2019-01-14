@@ -58,29 +58,29 @@ trait WebService extends LolJsonProtocol
   	corsHandler (
   	pathPrefix("lol"){ 
   		concat(
-  		path("data" / "get"){
-	  		get {
-		  		authenticated{ claims=>
-			  	rejectEmptyResponse {
-			  	onComplete((dataAccessService ? GraphDataRequest).mapTo[GraphDataRequestResponse]) { 
-			  		case Success(graphdata) => 
-			  			complete(graphdata.data)
-			  		case Failure(e) => 
-			  			complete(StatusCodes.BadRequest)
+  		path("data" / "get" / Segment) { symbol =>
+		  		get {
+			  		authenticated{ claims=>
+				  	rejectEmptyResponse {
+				  	onComplete((dataAccessService ? GraphDataRequest(symbol)).mapTo[GraphDataRequestResponse]) { 
+				  		case Success(graphdata) => 
+				  			complete(graphdata.data)
+				  		case Failure(e) => 
+				  			complete(StatusCodes.BadRequest)
 						}
 					}
 				}
 			}
   		},
-  		path("data" / "compute"){
-	  		get {
-		  		authenticated{ claims=>
-			  	rejectEmptyResponse {
-			  	onComplete((dataAccessService ? VolatilityAnalysisRequest).mapTo[VolatilityAnalysisResponse]) { 
-			  		case Success(volatilitycalculation) => 
-			  			complete(volatilitycalculation.data)
-			  		case Failure(e) => 
-			  			complete(StatusCodes.BadRequest)
+  		path("data" / "compute"/ Segment) { symbol=>
+		  		get {
+			  		authenticated{ claims=>
+				  	rejectEmptyResponse {
+				  	onComplete((dataAccessService ? VolatilityAnalysisRequest(symbol)).mapTo[VolatilityAnalysisResponse]) { 
+				  		case Success(volatilitycalculation) => 
+				  			complete(volatilitycalculation.data)
+				  		case Failure(e) => 
+				  			complete(StatusCodes.BadRequest)
 						}
 					}
 				}

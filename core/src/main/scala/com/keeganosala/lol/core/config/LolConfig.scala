@@ -20,7 +20,10 @@ private[config] trait LolConfig {
   val brokerTimeout = LolUtil.parseFiniteDuration(config.getString("lol.actor-timeout.broker")).get
   
   // Broker
-  val brokerUrl = config.getString("lol.alphavantage.request-url")
+  val brokerUrlFirst = config.getString("lol.alphavantage.request-url-firstpart")
+
+  val brokerUrlLast  = config.getString("lol.alphavantage.request-url-lastpart")
+
   
   //http
   val httpRequestTimeout = LolUtil.parseFiniteDuration(config.getString("lol.http.request-timeout")).get

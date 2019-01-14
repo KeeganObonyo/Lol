@@ -19,7 +19,9 @@ import marshalling.AlphavantageMarshalling
 
 object AlphavantageGateway {
 
-	case object AlphavantageDataGatewayRequest
+	case class AlphavantageDataGatewayRequest(
+		symbol:String
+	)
 
 	case class AlphavantageDataGatewayResponse(
     `Time Series (1min)`: Map[String,Map[String,String]]
@@ -39,7 +41,10 @@ class AlphavantageGateway extends Actor
 
  	implicit val materializer = ActorMaterializer()
 
-  	val url             	  = LolConfig.brokerUrl
+  	val urlF             	  = LolConfig.brokerUrlFirst
+
+  	val urlL             	  = LolConfig.brokerUrlLast
+
 
 	import AlphavantageGateway._
 	import context.dispatcher
@@ -47,9 +52,10 @@ class AlphavantageGateway extends Actor
 	def sendHttpRequest(request:HttpRequest):Future[HttpResponse] = Http().singleRequest(request)
 
 	def receive: Receive = {
-		case AlphavantageDataGatewayRequest =>
+		case request:AlphavantageDataGatewayRequest =>
 			log.info("processing" + AlphavantageDataGatewayRequest)
 			val currentSender  = sender
+			val url            = urlF + request.symbol + urlL
     		val responseFuture = sendHttpRequest(HttpRequest(
     			method = HttpMethods.GET,
     			uri    = url))
